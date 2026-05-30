@@ -19,5 +19,6 @@ export type Job = {
   draft: string | null;
   status: string;
   feedback: string | null; // 'up' | 'down' | null
+  premium: boolean | null; // empresa TOP
   created_at: string;
 };

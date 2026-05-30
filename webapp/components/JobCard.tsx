@@ -29,8 +29,15 @@ export default function JobCard({ job }: { job: Job }) {
     <div className="bg-white border border-slate-200 rounded-xl p-4">
       <div className="flex justify-between gap-3">
         <div>
-          <div className="text-[11px] font-bold text-teal-700 tracking-wide">
-            {job.source} · MATCH {job.score}
+          <div className="text-[11px] font-bold tracking-wide flex items-center gap-2">
+            {job.premium && (
+              <span className="bg-amber-100 text-amber-800 border border-amber-300 rounded px-1.5 py-0.5">
+                🏆 TOP
+              </span>
+            )}
+            <span className="text-teal-700">
+              {job.source} · MATCH {job.score}
+            </span>
           </div>
           <div className="font-bold text-lg leading-tight">{job.title}</div>
           <div className="text-sm text-slate-500">

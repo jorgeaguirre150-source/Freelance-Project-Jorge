@@ -8,18 +8,21 @@ const STATUS_TABS = ["all", "new", "applied", "interview", "won", "rejected"];
 export default async function Dashboard({
   searchParams,
 }: {
-  searchParams: { status?: string; min?: string };
+  searchParams: { status?: string; min?: string; prem?: string };
 }) {
   const min = Number(searchParams.min ?? 70);
   const status = searchParams.status ?? "all";
+  const premOnly = searchParams.prem === "1";
 
   let q = supabaseAdmin()
     .from("jobs")
     .select("*")
     .gte("score", min)
+    .order("premium", { ascending: false })
     .order("score", { ascending: false })
     .limit(300);
   if (status !== "all") q = q.eq("status", status);
+  if (premOnly) q = q.eq("premium", true);
 
   const { data, error } = await q;
   const jobs = (data ?? []) as Job[];
@@ -54,7 +57,7 @@ export default async function Dashboard({
         {STATUS_TABS.map((s) => (
           <a
             key={s}
-            href={`/?status=${s}&min=${min}`}
+            href={`/?status=${s}&min=${min}${premOnly ? "&prem=1" : ""}`}
             className={`px-3 py-1 rounded-full border ${
               status === s ? "bg-ink text-white" : "bg-white text-slate-700"
             }`}
@@ -64,10 +67,18 @@ export default async function Dashboard({
           </a>
         ))}
         <a
-          href={`/?status=${status}&min=${min === 70 ? 0 : 70}`}
+          href={`/?status=${status}&min=${min === 70 ? 0 : 70}${premOnly ? "&prem=1" : ""}`}
           className="px-3 py-1 rounded-full border bg-white text-slate-700"
         >
           umbral: ≥ {min} {min === 70 ? "(ver todas)" : "(solo top)"}
+        </a>
+        <a
+          href={`/?status=${status}&min=${min}${premOnly ? "" : "&prem=1"}`}
+          className={`px-3 py-1 rounded-full border ${
+            premOnly ? "bg-amber-400 border-amber-400 text-amber-900" : "bg-white text-slate-700"
+          }`}
+        >
+          🏆 solo empresas top
         </a>
       </div>
 

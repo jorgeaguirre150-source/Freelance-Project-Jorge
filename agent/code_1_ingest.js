@@ -79,7 +79,41 @@ if(ADZUNA_ID && ADZUNA_KEY){
   }
 }
 
-// Prefiltro por sector (barato, antes de gastar tokens)
+// --- PREMIUM: 10 empresas TOP del sector (ATS oficiales) — freelance O fijo ---
+// Edita token si alguna empresa cambia de ATS. Todas envueltas en safe() => si una falla, sigue.
+const PREMIUM = [
+  { name:'Anthropic',    provider:'greenhouse', token:'anthropic' },
+  { name:'Databricks',   provider:'greenhouse', token:'databricks' },
+  { name:'HashiCorp',    provider:'greenhouse', token:'hashicorp' },
+  { name:'Hugging Face', provider:'greenhouse', token:'huggingface' },
+  { name:'GitLab',       provider:'greenhouse', token:'gitlab' },
+  { name:'Elastic',      provider:'greenhouse', token:'elastic' },
+  { name:'Canonical',    provider:'greenhouse', token:'canonical' },
+  { name:'OpenAI',       provider:'ashby',      token:'openai' },
+  { name:'Cohere',       provider:'ashby',      token:'cohere' },
+  { name:'Scale AI',     provider:'lever',      token:'scaleai' },
+];
+async function fetchATS(c){
+  if(c.provider==='greenhouse'){
+    const r = await http({ url:`https://boards-api.greenhouse.io/v1/boards/${c.token}/jobs?content=true`, json:true });
+    return (r.jobs||[]).map(j=>({ source:'🏆 '+c.name, premium:true, title:j.title, company:c.name,
+      location:(j.location&&j.location.name)||'', url:j.absolute_url, description:strip(j.content), salary:'' }));
+  }
+  if(c.provider==='lever'){
+    const r = await http({ url:`https://api.lever.co/v0/postings/${c.token}?mode=json`, json:true });
+    return (Array.isArray(r)?r:[]).map(j=>({ source:'🏆 '+c.name, premium:true, title:j.text, company:c.name,
+      location:(j.categories&&j.categories.location)||'', url:j.hostedUrl, description:strip(j.descriptionPlain||j.description), salary:'' }));
+  }
+  if(c.provider==='ashby'){
+    const r = await http({ url:`https://api.ashbyhq.com/posting-api/job-board/${c.token}`, json:true });
+    return (r.jobs||[]).map(j=>({ source:'🏆 '+c.name, premium:true, title:j.title, company:c.name,
+      location:j.location||'', url:j.jobUrl||j.applyUrl, description:strip(j.descriptionPlain||j.description), salary:'' }));
+  }
+  return [];
+}
+for(const c of PREMIUM){ jobs = jobs.concat(await safe('Premium:'+c.name, ()=>fetchATS(c))); }
+
+// Prefiltro por sector (barato, antes de gastar tokens) — aplica a todas (incl. premium en tu sector)
 jobs = jobs.filter(j=>{ const t=((j.title||'')+' '+(j.description||'')).toLowerCase();
   return KEYWORDS.some(k=>t.includes(k)); });
 

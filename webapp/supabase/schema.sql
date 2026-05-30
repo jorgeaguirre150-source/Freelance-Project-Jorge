@@ -16,6 +16,7 @@ create table if not exists jobs (
   draft       text,
   status      text not null default 'new',
   feedback    text,                 -- 'up' | 'down' | null  (aprende tu gusto)
+  premium     boolean default false, -- oferta de empresa TOP (freelance o fijo)
   created_at  timestamptz not null default now()
 );
 

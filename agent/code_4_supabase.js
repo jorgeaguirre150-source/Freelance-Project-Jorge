@@ -5,14 +5,14 @@ const URL = $env.SUPABASE_URL;
 const KEY = $env.SUPABASE_SERVICE_ROLE_KEY;
 
 const d = $input.first().json;
-const all = [].concat(d.shortlist || [], d.more || []);
+const all = [].concat(d.premium || [], d.shortlist || [], d.more || []);
 
 if(URL && KEY && all.length){
   const rows = all.map(j=>({
     dedup_key: ((j.url||'') || ((j.title||'')+'|'+(j.company||''))).toLowerCase().trim(),
     source:j.source, title:j.title, company:j.company, location:j.location, url:j.url,
     salary:j.salary, description:(j.description||'').slice(0,2000),
-    score:j.score, reason:j.reason,
+    score:j.score, reason:j.reason, premium: !!j.premium,
     draft: j.draft || undefined   // no sobrescribe drafts existentes si no hay uno nuevo
   }));
   try {
