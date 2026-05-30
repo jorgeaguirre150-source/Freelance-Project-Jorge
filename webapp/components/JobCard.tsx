@@ -1,7 +1,7 @@
 "use client";
 import { useState, useTransition } from "react";
 import type { Job } from "@/lib/supabase";
-import { updateStatus, saveDraft } from "@/app/actions";
+import { updateStatus, saveDraft, setFeedback } from "@/app/actions";
 
 const STATUSES = ["new", "applied", "interview", "won", "rejected"];
 
@@ -9,6 +9,7 @@ export default function JobCard({ job }: { job: Job }) {
   const [draft, setDraft] = useState(job.draft ?? "");
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState(job.status);
+  const [fb, setFb] = useState<string | null>(job.feedback);
   const [, startTransition] = useTransition();
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -16,6 +17,12 @@ export default function JobCard({ job }: { job: Job }) {
   function changeStatus(s: string) {
     setStatus(s);
     startTransition(() => updateStatus(job.id, s));
+  }
+
+  function vote(v: "up" | "down") {
+    const next = fb === v ? null : v; // toggle
+    setFb(next);
+    startTransition(() => setFeedback(job.id, next));
   }
 
   return (
@@ -35,17 +42,35 @@ export default function JobCard({ job }: { job: Job }) {
             <div className="text-xs text-orange-700 italic mt-1">{job.reason}</div>
           )}
         </div>
-        <select
-          value={status}
-          onChange={(e) => changeStatus(e.target.value)}
-          className="h-8 border rounded-lg text-sm self-start px-2 bg-white"
-        >
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+        <div className="flex flex-col items-end gap-2 self-start">
+          <div className="flex gap-1">
+            <button
+              onClick={() => vote("up")}
+              title="Me interesa (calibra el agente)"
+              className={`h-8 w-8 rounded-lg border text-base ${fb === "up" ? "bg-teal-500 border-teal-500" : "bg-white"}`}
+            >
+              👍
+            </button>
+            <button
+              onClick={() => vote("down")}
+              title="No me interesa (calibra el agente)"
+              className={`h-8 w-8 rounded-lg border text-base ${fb === "down" ? "bg-red-400 border-red-400" : "bg-white"}`}
+            >
+              👎
+            </button>
+          </div>
+          <select
+            value={status}
+            onChange={(e) => changeStatus(e.target.value)}
+            className="h-8 border rounded-lg text-sm px-2 bg-white"
+          >
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="flex gap-4 mt-2 text-sm items-center">

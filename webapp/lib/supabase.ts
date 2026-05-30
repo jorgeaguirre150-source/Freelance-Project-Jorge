@@ -18,5 +18,6 @@ export type Job = {
   reason: string | null;
   draft: string | null;
   status: string;
+  feedback: string | null; // 'up' | 'down' | null
   created_at: string;
 };

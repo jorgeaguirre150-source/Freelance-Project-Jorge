@@ -15,6 +15,7 @@ create table if not exists jobs (
   reason      text,
   draft       text,
   status      text not null default 'new',
+  feedback    text,                 -- 'up' | 'down' | null  (aprende tu gusto)
   created_at  timestamptz not null default now()
 );
 

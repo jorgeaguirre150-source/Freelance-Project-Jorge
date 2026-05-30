@@ -11,3 +11,9 @@ export async function saveDraft(id: string, draft: string) {
   await supabaseAdmin().from("jobs").update({ draft }).eq("id", id);
   revalidatePath("/");
 }
+
+// Feedback 👍/👎 — calibra el scoring del agente (toggle)
+export async function setFeedback(id: string, value: "up" | "down" | null) {
+  await supabaseAdmin().from("jobs").update({ feedback: value }).eq("id", id);
+  revalidatePath("/");
+}

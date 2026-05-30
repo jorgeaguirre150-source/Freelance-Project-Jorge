@@ -35,6 +35,26 @@ async function anthropic(model, system, user, maxTokens){
 }
 const parseArr = (txt)=>{ const m = txt.match(/\[[\s\S]*\]/); return m ? JSON.parse(m[0]) : []; };
 
+// ---- CALIBRACION: aprende tu gusto con el feedback 👍/👎 del dashboard ----
+const SB_URL = $env.SUPABASE_URL;
+const SB_KEY = $env.SUPABASE_SERVICE_ROLE_KEY;
+async function fbExamples(v){
+  if(!SB_URL || !SB_KEY) return [];
+  try{
+    const r = await http({ url:`${SB_URL}/rest/v1/jobs?feedback=eq.${v}&select=title,company,location&order=created_at.desc&limit=12`,
+      headers:{ apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}` }, json:true });
+    return Array.isArray(r) ? r : [];
+  }catch(e){ console.log('feedback fetch fail:', e.message); return []; }
+}
+const liked = await fbExamples('up');
+const disliked = await fbExamples('down');
+const fmt = (a)=> a.map(x=>`- ${x.title} @ ${x.company||'?'} (${x.location||'?'})`).join('\n');
+const CAL = (liked.length || disliked.length)
+  ? `\n\nCALIBRATION — learn from the candidate's past feedback. `+
+    `Boost jobs similar to LIKED, penalize jobs similar to DISLIKED.\nLIKED (score HIGH):\n${fmt(liked)||'(none)'}\nDISLIKED (score LOW):\n${fmt(disliked)||'(none)'}`
+  : '';
+console.log(`Calibracion: ${liked.length} 👍 / ${disliked.length} 👎`);
+
 // ---- 1) SCORING por lotes (Haiku) ----
 const pool = items.slice(0, MAX_SCORE);
 const scoreSys = `You score how well freelance/contract jobs match a candidate. Return ONLY a JSON array, no prose. `+
@@ -46,7 +66,7 @@ let allScores = [];
 for(let start=0; start<pool.length; start+=CHUNK){
   const batch = pool.slice(start, start+CHUNK).map((j,k)=>({ i:start+k, title:j.title, company:j.company,
     location:j.location, salary:j.salary, desc:(j.description||'').slice(0,400) }));
-  const user = `PROFILE:\n${PROFILE}\n\nJOBS (JSON):\n${JSON.stringify(batch)}\n\nReturn the JSON array of scores.`;
+  const user = `PROFILE:\n${PROFILE}${CAL}\n\nJOBS (JSON):\n${JSON.stringify(batch)}\n\nReturn the JSON array of scores.`;
   try { allScores = allScores.concat(parseArr(await anthropic(MODEL_SCORE, scoreSys, user, 3000))); }
   catch(e){ console.log('score batch fail @'+start+':', e.message);
     allScores = allScores.concat(batch.map(b=>({ i:b.i, score:50, reason:'fallback' }))); }
