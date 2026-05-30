@@ -6,22 +6,21 @@ export const dynamic = "force-dynamic";
 
 const STATUS_TABS = ["all", "new", "applied", "interview", "won", "rejected"];
 
-export default async function Dashboard({
+export default async function TopDashboard({
   searchParams,
 }: {
-  searchParams: { status?: string; min?: string };
+  searchParams: { status?: string };
 }) {
-  const min = Number(searchParams.min ?? 70);
   const status = searchParams.status ?? "all";
 
-  // GENERAL = todo MENOS empresas top (esas van en /top)
+  // SOLO empresas TOP — orden por frescura (created_at) y luego match
   let q = supabaseAdmin()
     .from("jobs")
     .select("*")
-    .gte("score", min)
-    .or("premium.is.null,premium.eq.false")
+    .eq("premium", true)
+    .order("created_at", { ascending: false })
     .order("score", { ascending: false })
-    .limit(300);
+    .limit(200);
   if (status !== "all") q = q.eq("status", status);
 
   const { data, error } = await q;
@@ -29,11 +28,11 @@ export default async function Dashboard({
 
   return (
     <main className="max-w-4xl mx-auto p-6">
-      <Nav active="all" />
+      <Nav active="top" />
       <header className="mb-5">
-        <h1 className="text-2xl font-extrabold">Búsqueda general</h1>
+        <h1 className="text-2xl font-extrabold">🏆 Empresas TOP — Fresh News</h1>
         <p className="text-sm text-slate-500">
-          {jobs.length} ofertas (match ≥ {min}) · floor 295€+IVA
+          {jobs.length} oportunidades · freelance o fijo · directo de boards oficiales
         </p>
       </header>
 
@@ -41,20 +40,14 @@ export default async function Dashboard({
         {STATUS_TABS.map((s) => (
           <a
             key={s}
-            href={`/?status=${s}&min=${min}`}
+            href={`/top?status=${s}`}
             className={`px-3 py-1 rounded-full border ${
-              status === s ? "bg-ink text-white" : "bg-white text-slate-700"
+              status === s ? "bg-amber-400 border-amber-400 text-amber-900" : "bg-white text-slate-700"
             }`}
           >
             {s}
           </a>
         ))}
-        <a
-          href={`/?status=${status}&min=${min === 70 ? 0 : 70}`}
-          className="px-3 py-1 rounded-full border bg-white text-slate-700"
-        >
-          umbral: ≥ {min} {min === 70 ? "(ver todas)" : "(solo top)"}
-        </a>
       </div>
 
       {error && (
@@ -68,7 +61,10 @@ export default async function Dashboard({
           <JobCard key={j.id} job={j} />
         ))}
         {jobs.length === 0 && !error && (
-          <p className="text-slate-500">Sin ofertas para este filtro todavía.</p>
+          <p className="text-slate-500">
+            Aún no hay ofertas de empresas top. Ejecuta el agente o revisa los tokens ATS en{" "}
+            <code>code_1_ingest.js</code>.
+          </p>
         )}
       </div>
     </main>

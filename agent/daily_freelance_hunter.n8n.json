@@ -2,12 +2,12 @@
   "name": "Daily Freelance Hunter",
   "nodes": [
     {
-      "id": "0abb5cf1-9edc-4d0d-884b-62d47f8dd794",
+      "id": "55e5fb92-19a8-4b13-967f-86aabcd72523",
       "name": "Cron 08:30 (busqueda)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        200,
+        180,
         300
       ],
       "parameters": {
@@ -22,12 +22,12 @@
       }
     },
     {
-      "id": "1302381f-de39-4836-a1e1-d0e879405ff0",
+      "id": "15725c4e-ebe0-4e3b-b9fe-65817b57c9c4",
       "name": "1. Ingest + Dedup",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        400,
+        380,
         300
       ],
       "parameters": {
@@ -37,12 +37,12 @@
       }
     },
     {
-      "id": "f0a69efb-72ad-40be-8e31-d481094da44b",
+      "id": "7773c1a1-fbb4-4fed-a2b0-9520079b75f5",
       "name": "2. AI Score + Draft",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        600,
+        580,
         300
       ],
       "parameters": {
@@ -52,12 +52,12 @@
       }
     },
     {
-      "id": "5446a447-c0de-424e-8c2c-98a1e5e0a210",
+      "id": "3896b1a5-9a8f-4203-9992-8837a7567947",
       "name": "3. Upsert Supabase",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        800,
+        780,
         300
       ],
       "parameters": {
@@ -67,12 +67,12 @@
       }
     },
     {
-      "id": "986e8564-8ba9-471f-a5b5-ee5e90336fdc",
+      "id": "f1b3fb07-af0a-48ef-8fa2-c359e012f23d",
       "name": "Wait -> 09:00",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        1000,
+        980,
         300
       ],
       "parameters": {
@@ -82,28 +82,61 @@
       }
     },
     {
-      "id": "999686d0-1481-4181-81be-e4e4ce79fc69",
-      "name": "4. Build Email",
+      "id": "32e26c40-1608-43e7-85ed-b525949b9965",
+      "name": "4. Build Email General",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1200,
-        300
+        1180,
+        200
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// NODO 4 — Build Email HTML  (mode: Run Once for All Items)\n// Seccion 0: 🏆 Empresas TOP. Seccion A: shortlist con borrador. Seccion B: todas las demas.\nconst d = $input.first().json;\nconst premium = d.premium || [];\nconst short   = d.shortlist || [];\nconst more    = d.more || [];\nconst today = new Date().toISOString().slice(0,10);\nconst esc = (s)=> (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');\n\nfunction card(j, n, gold){\n  const draftBox = j.draft ? `<div style=\"background:#f7fafc;border-left:3px solid ${gold?'#F6B73C':'#16C2C2'};padding:10px 12px;margin-top:8px;font-size:12.5px;color:#34465a;white-space:pre-wrap;\">${esc(j.draft)}</div>` : '';\n  return `\n  <div style=\"border:1px solid ${gold?'#F6D98A':'#e2e8f0'};border-radius:10px;padding:14px 16px;margin:10px 0;${gold?'background:#fffdf5;':''}\">\n    <div style=\"font-size:11px;color:${gold?'#9a6b00':'#0d6e74'};font-weight:700;letter-spacing:.04em;\">${esc(j.source)} &middot; MATCH ${j.score}</div>\n    <div style=\"font-size:16px;font-weight:800;color:#0A1A2F;margin:3px 0;\">${n}. ${esc(j.title)}</div>\n    <div style=\"font-size:13px;color:#5b6b7c;\">${esc(j.company)} &middot; ${esc(j.location)}${j.salary?(' &middot; '+esc(j.salary)):''}</div>\n    <div style=\"font-size:12px;color:#8a3b1c;margin:4px 0;font-style:italic;\">${esc(j.reason)}</div>\n    <a href=\"${esc(j.url)}\" style=\"display:inline-block;font-size:13px;color:#16C2C2;font-weight:700;text-decoration:none;margin:2px 0;\">Ver oferta y aplicar &rarr;</a>\n    ${draftBox}\n  </div>`;\n}\n\nconst premiumCards = premium.map((j,i)=>card(j,i+1,true)).join('');\nconst shortCards   = short.map((j,i)=>card(j,i+1,false)).join('');\nconst moreRows = more.map((j)=>`\n  <tr>\n    <td style=\"padding:6px 8px;border-bottom:1px solid #eef2f7;font-weight:700;color:#0A1A2F;font-size:12px;\">${j.score}</td>\n    <td style=\"padding:6px 8px;border-bottom:1px solid #eef2f7;font-size:12px;\"><a href=\"${esc(j.url)}\" style=\"color:#0d6e74;text-decoration:none;\">${esc(j.title)}</a></td>\n    <td style=\"padding:6px 8px;border-bottom:1px solid #eef2f7;font-size:12px;color:#5b6b7c;\">${esc(j.company)}</td>\n    <td style=\"padding:6px 8px;border-bottom:1px solid #eef2f7;font-size:11px;color:#8a96a3;\">${esc(j.source)} &middot; ${esc(j.location)}</td>\n  </tr>`).join('');\n\nconst moreTable = more.length ? `\n  <h3 style=\"color:#0A1A2F;font-size:15px;margin:22px 16px 6px;\">Todas las demas opciones (${more.length})</h3>\n  <table style=\"width:calc(100% - 32px);margin:0 16px;border-collapse:collapse;\">\n    <tr style=\"text-align:left;color:#8a96a3;font-size:11px;\"><th style=\"padding:6px 8px;\">Match</th><th style=\"padding:6px 8px;\">Puesto</th><th style=\"padding:6px 8px;\">Empresa</th><th style=\"padding:6px 8px;\">Fuente</th></tr>\n    ${moreRows}\n  </table>` : '';\n\nconst premiumBlock = premium.length ? `\n  <h3 style=\"color:#9a6b00;font-size:16px;margin:16px 0 4px;\">🏆 Empresas TOP (freelance o fijo) — ${premium.length}</h3>\n  ${premiumCards}` : '';\n\nconst html = `<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:720px;margin:auto;background:#fff;\">\n  <div style=\"background:linear-gradient(120deg,#0A1A2F,#0d6e74);color:#fff;padding:22px 24px;border-radius:12px 12px 0 0;\">\n    <div style=\"font-size:20px;font-weight:800;\">Daily Freelance Hunter</div>\n    <div style=\"font-size:13px;color:#9fe6e6;\">${today} &middot; ${d.total} oportunidades &middot; ${premium.length} en empresas top</div>\n  </div>\n  <div style=\"padding:8px 16px 20px;\">\n    ${premiumBlock}\n    <h3 style=\"color:#0A1A2F;font-size:15px;margin:18px 0 4px;\">Top ${short.length} con borrador listo</h3>\n    ${shortCards || '<p style=\"color:#5b6b7c;padding:12px;\">Sin mas ofertas con borrador hoy.</p>'}\n    ${moreTable}\n    <p style=\"color:#9aa7b4;font-size:11px;margin-top:22px;\">Generado automaticamente. Revisa cada borrador antes de enviar. No se ha aplicado a nada por ti.</p>\n  </div>\n</div>`;\n\nreturn [{ json:{ html, subject:`${d.total} ofertas (${premium.length} top) — ${today}` } }];\n"
+        "jsCode": "// NODO — Build Email GENERAL (sin premium; las top van en su propio Fresh News)\nconst d = $input.first().json;\nconst short = d.shortlist || [];\nconst more  = d.more || [];\nconst today = new Date().toISOString().slice(0,10);\nconst esc = (s)=> (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');\n\nfunction card(j, n){\n  const draftBox = j.draft ? `<div style=\"background:#f7fafc;border-left:3px solid #16C2C2;padding:10px 12px;margin-top:8px;font-size:12.5px;color:#34465a;white-space:pre-wrap;\">${esc(j.draft)}</div>` : '';\n  return `\n  <div style=\"border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin:10px 0;\">\n    <div style=\"font-size:11px;color:#0d6e74;font-weight:700;letter-spacing:.04em;\">${esc(j.source)} &middot; MATCH ${j.score}</div>\n    <div style=\"font-size:16px;font-weight:800;color:#0A1A2F;margin:3px 0;\">${n}. ${esc(j.title)}</div>\n    <div style=\"font-size:13px;color:#5b6b7c;\">${esc(j.company)} &middot; ${esc(j.location)}${j.salary?(' &middot; '+esc(j.salary)):''}</div>\n    <div style=\"font-size:12px;color:#8a3b1c;margin:4px 0;font-style:italic;\">${esc(j.reason)}</div>\n    <a href=\"${esc(j.url)}\" style=\"display:inline-block;font-size:13px;color:#16C2C2;font-weight:700;text-decoration:none;margin:2px 0;\">Ver oferta y aplicar &rarr;</a>\n    ${draftBox}\n  </div>`;\n}\n\nconst shortCards = short.map((j,i)=>card(j,i+1)).join('');\nconst moreRows = more.map((j)=>`\n  <tr>\n    <td style=\"padding:6px 8px;border-bottom:1px solid #eef2f7;font-weight:700;color:#0A1A2F;font-size:12px;\">${j.score}</td>\n    <td style=\"padding:6px 8px;border-bottom:1px solid #eef2f7;font-size:12px;\"><a href=\"${esc(j.url)}\" style=\"color:#0d6e74;text-decoration:none;\">${esc(j.title)}</a></td>\n    <td style=\"padding:6px 8px;border-bottom:1px solid #eef2f7;font-size:12px;color:#5b6b7c;\">${esc(j.company)}</td>\n    <td style=\"padding:6px 8px;border-bottom:1px solid #eef2f7;font-size:11px;color:#8a96a3;\">${esc(j.source)} &middot; ${esc(j.location)}</td>\n  </tr>`).join('');\n\nconst moreTable = more.length ? `\n  <h3 style=\"color:#0A1A2F;font-size:15px;margin:22px 16px 6px;\">Todas las demas opciones (${more.length})</h3>\n  <table style=\"width:calc(100% - 32px);margin:0 16px;border-collapse:collapse;\">\n    <tr style=\"text-align:left;color:#8a96a3;font-size:11px;\"><th style=\"padding:6px 8px;\">Match</th><th style=\"padding:6px 8px;\">Puesto</th><th style=\"padding:6px 8px;\">Empresa</th><th style=\"padding:6px 8px;\">Fuente</th></tr>\n    ${moreRows}\n  </table>` : '';\n\nconst count = short.length + more.length;\nconst html = `<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:720px;margin:auto;background:#fff;\">\n  <div style=\"background:linear-gradient(120deg,#0A1A2F,#0d6e74);color:#fff;padding:22px 24px;border-radius:12px 12px 0 0;\">\n    <div style=\"font-size:20px;font-weight:800;\">Daily Freelance Hunter — General</div>\n    <div style=\"font-size:13px;color:#9fe6e6;\">${today} &middot; ${count} oportunidades (floor 295&euro;+IVA)</div>\n  </div>\n  <div style=\"padding:8px 16px 20px;\">\n    <h3 style=\"color:#0A1A2F;font-size:15px;margin:14px 0 4px;\">Top ${short.length} con borrador listo</h3>\n    ${shortCards || '<p style=\"color:#5b6b7c;padding:12px;\">Sin ofertas con borrador hoy.</p>'}\n    ${moreTable}\n    <p style=\"color:#9aa7b4;font-size:11px;margin-top:22px;\">Las empresas TOP van en el correo \"Fresh News\" aparte. Revisa cada borrador antes de enviar.</p>\n  </div>\n</div>`;\n\nreturn [{ json:{ html, subject:`${count} ofertas freelance — ${today}` } }];\n"
       }
     },
     {
-      "id": "225fab45-3880-4eef-baef-b09de4c64442",
-      "name": "5. Send Email 09:00",
+      "id": "d251879c-d824-4e4e-b98c-9f246bd48e2c",
+      "name": "5. Send General 09:00",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        1400,
-        300
+        1380,
+        200
+      ],
+      "parameters": {
+        "fromEmail": "aguirre_coslada@hotmail.com",
+        "toEmail": "aguirre_coslada@hotmail.com",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html }}",
+        "options": {}
+      }
+    },
+    {
+      "id": "c7c7920e-1ec9-479f-bda1-3d589da1bcb7",
+      "name": "6. Build Fresh News (TOP)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1180,
+        420
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// NODO — Build \"Fresh News\" (SOLO empresas TOP, prioritario)  (Run Once for All Items)\nconst d = $input.first().json;\nconst premium = d.premium || [];\nconst today = new Date().toISOString().slice(0,10);\nconst esc = (s)=> (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');\n\nconst cards = premium.map((j,i)=>{\n  const draftBox = j.draft ? `<div style=\"background:#fffdf5;border-left:3px solid #F6B73C;padding:10px 12px;margin-top:8px;font-size:12.5px;color:#34465a;white-space:pre-wrap;\">${esc(j.draft)}</div>` : '';\n  return `\n  <div style=\"border:1px solid #F6D98A;background:#fffdf5;border-radius:10px;padding:14px 16px;margin:10px 0;\">\n    <div style=\"font-size:11px;color:#9a6b00;font-weight:700;letter-spacing:.04em;\">${esc(j.source)} &middot; MATCH ${j.score}</div>\n    <div style=\"font-size:16px;font-weight:800;color:#0A1A2F;margin:3px 0;\">${i+1}. ${esc(j.title)}</div>\n    <div style=\"font-size:13px;color:#5b6b7c;\">${esc(j.company)} &middot; ${esc(j.location)}${j.salary?(' &middot; '+esc(j.salary)):''}</div>\n    <div style=\"font-size:12px;color:#8a3b1c;margin:4px 0;font-style:italic;\">${esc(j.reason)}</div>\n    <a href=\"${esc(j.url)}\" style=\"display:inline-block;font-size:13px;color:#b9810c;font-weight:700;text-decoration:none;margin:2px 0;\">Ver oferta y aplicar &rarr;</a>\n    ${draftBox}\n  </div>`;\n}).join('');\n\nconst html = `<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:720px;margin:auto;background:#fff;\">\n  <div style=\"background:linear-gradient(120deg,#7a5200,#c8941b);color:#fff;padding:22px 24px;border-radius:12px 12px 0 0;\">\n    <div style=\"font-size:20px;font-weight:800;\">🏆 Fresh News — Empresas TOP</div>\n    <div style=\"font-size:13px;color:#ffe9b8;\">${today} &middot; ${premium.length} oportunidades (freelance o fijo)</div>\n  </div>\n  <div style=\"padding:8px 16px 20px;\">\n    ${cards || '<p style=\"color:#5b6b7c;padding:12px;\">Sin novedades de empresas top hoy.</p>'}\n    <p style=\"color:#9aa7b4;font-size:11px;margin-top:22px;\">Directo de los boards oficiales (Greenhouse/Lever/Ashby). Prioridad máxima.</p>\n  </div>\n</div>`;\n\nreturn [{ json:{ html, subject:`🏆 Fresh News — ${premium.length} en empresas TOP — ${today}` } }];\n"
+      }
+    },
+    {
+      "id": "b925c745-9eb6-4bf6-abf0-a2a34e4de98b",
+      "name": "7. Send Fresh News 09:00",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1380,
+        420
       ],
       "parameters": {
         "fromEmail": "aguirre_coslada@hotmail.com",
@@ -164,18 +197,34 @@
       "main": [
         [
           {
-            "node": "4. Build Email",
+            "node": "4. Build Email General",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "6. Build Fresh News (TOP)",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "4. Build Email": {
+    "4. Build Email General": {
       "main": [
         [
           {
-            "node": "5. Send Email 09:00",
+            "node": "5. Send General 09:00",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "6. Build Fresh News (TOP)": {
+      "main": [
+        [
+          {
+            "node": "7. Send Fresh News 09:00",
             "type": "main",
             "index": 0
           }

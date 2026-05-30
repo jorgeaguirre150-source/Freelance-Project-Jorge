@@ -5,36 +5,43 @@ const crypto = require('crypto');
 const dir = __dirname;
 const read = (f) => fs.readFileSync(path.join(dir, f), 'utf8');
 const id = () => crypto.randomUUID();
-const codeNode = (name, x, code) => ({
-  id: id(), name, type: 'n8n-nodes-base.code', typeVersion: 2, position: [x, 300],
+const codeNode = (name, x, y, code) => ({
+  id: id(), name, type: 'n8n-nodes-base.code', typeVersion: 2, position: [x, y],
   parameters: { mode: 'runOnceForAllItems', language: 'javaScript', jsCode: code }
+});
+const emailNode = (name, x, y) => ({
+  id: id(), name, type: 'n8n-nodes-base.emailSend', typeVersion: 2.1, position: [x, y],
+  parameters: { fromEmail: 'aguirre_coslada@hotmail.com', toEmail: 'aguirre_coslada@hotmail.com',
+    subject: '={{ $json.subject }}', emailFormat: 'html', html: '={{ $json.html }}', options: {} }
 });
 
 const nodes = [
-  // Dispara la BUSQUEDA a las 08:30 todos los dias
-  { id: id(), name: 'Cron 08:30 (busqueda)', type: 'n8n-nodes-base.scheduleTrigger', typeVersion: 1.2, position: [200, 300],
+  { id: id(), name: 'Cron 08:30 (busqueda)', type: 'n8n-nodes-base.scheduleTrigger', typeVersion: 1.2, position: [180, 300],
     parameters: { rule: { interval: [{ field: 'cronExpression', expression: '30 8 * * *' }] } } },
-  codeNode('1. Ingest + Dedup', 400, read('code_1_ingest.js')),
-  codeNode('2. AI Score + Draft', 600, read('code_2_ai.js')),
-  codeNode('3. Upsert Supabase', 800, read('code_4_supabase.js')),
-  // Espera ~30 min -> el reporte se envia hacia las 09:00
-  { id: id(), name: 'Wait -> 09:00', type: 'n8n-nodes-base.wait', typeVersion: 1.1, position: [1000, 300],
+  codeNode('1. Ingest + Dedup', 380, 300, read('code_1_ingest.js')),
+  codeNode('2. AI Score + Draft', 580, 300, read('code_2_ai.js')),
+  codeNode('3. Upsert Supabase', 780, 300, read('code_4_supabase.js')),
+  { id: id(), name: 'Wait -> 09:00', type: 'n8n-nodes-base.wait', typeVersion: 1.1, position: [980, 300],
     parameters: { resume: 'timeInterval', amount: 30, unit: 'minutes' } },
-  codeNode('4. Build Email', 1200, read('code_3_email.js')),
-  { id: id(), name: '5. Send Email 09:00', type: 'n8n-nodes-base.emailSend', typeVersion: 2.1, position: [1400, 300],
-    parameters: { fromEmail: 'aguirre_coslada@hotmail.com', toEmail: 'aguirre_coslada@hotmail.com',
-      subject: '={{ $json.subject }}', emailFormat: 'html', html: '={{ $json.html }}', options: {} } }
+  // Rama A: reporte general
+  codeNode('4. Build Email General', 1180, 200, read('code_3_email.js')),
+  emailNode('5. Send General 09:00', 1380, 200),
+  // Rama B: Fresh News empresas TOP (prioritario)
+  codeNode('6. Build Fresh News (TOP)', 1180, 420, read('code_5_fresh.js')),
+  emailNode('7. Send Fresh News 09:00', 1380, 420)
 ];
 
-const link = (from, to) => ({ [from]: { main: [[{ node: to, type: 'main', index: 0 }]] } });
-const connections = Object.assign({},
-  link('Cron 08:30 (busqueda)', '1. Ingest + Dedup'),
-  link('1. Ingest + Dedup', '2. AI Score + Draft'),
-  link('2. AI Score + Draft', '3. Upsert Supabase'),
-  link('3. Upsert Supabase', 'Wait -> 09:00'),
-  link('Wait -> 09:00', '4. Build Email'),
-  link('4. Build Email', '5. Send Email 09:00')
-);
+const one = (to) => ({ node: to, type: 'main', index: 0 });
+const connections = {
+  'Cron 08:30 (busqueda)': { main: [[one('1. Ingest + Dedup')]] },
+  '1. Ingest + Dedup':     { main: [[one('2. AI Score + Draft')]] },
+  '2. AI Score + Draft':   { main: [[one('3. Upsert Supabase')]] },
+  '3. Upsert Supabase':    { main: [[one('Wait -> 09:00')]] },
+  // Wait dispara las DOS ramas
+  'Wait -> 09:00':         { main: [[one('4. Build Email General'), one('6. Build Fresh News (TOP)')]] },
+  '4. Build Email General': { main: [[one('5. Send General 09:00')]] },
+  '6. Build Fresh News (TOP)': { main: [[one('7. Send Fresh News 09:00')]] }
+};
 
 const wf = { name: 'Daily Freelance Hunter', nodes, connections, active: false, settings: { executionOrder: 'v1' } };
 const out = path.join(dir, 'daily_freelance_hunter.n8n.json');
