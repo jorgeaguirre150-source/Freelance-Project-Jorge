@@ -63,8 +63,8 @@ h1{font-family:'Sora',sans-serif;font-size:48px;font-weight:800;line-height:1.05
 .metric .lbl{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:7px;text-transform:uppercase;letter-spacing:.05em}
 
 /* ---------- BODY ---------- */
-.body{padding:42px 64px 14px}
-section{margin-bottom:34px}
+.body{padding:34px 64px 10px}
+section{margin-bottom:24px}
 .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:28px}
 .sec-head .bar{width:5px;height:26px;border-radius:3px;background:linear-gradient(var(--teal),var(--cyan))}
 .sec-head h2{font-family:'Sora',sans-serif;font-size:19px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
@@ -81,7 +81,7 @@ section{margin-bottom:34px}
 /* timeline */
 .tl{position:relative;padding-left:30px}
 .tl::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line)}
-.job{position:relative;margin-bottom:30px}
+.job{position:relative;margin-bottom:22px}
 .job::before{content:"";position:absolute;left:-26px;top:4px;width:14px;height:14px;border-radius:50%;
   background:#fff;border:3px solid var(--teal);box-shadow:0 0 0 4px #E6FBFB}
 .job-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;align-items:baseline}
@@ -95,11 +95,22 @@ section{margin-bottom:34px}
 .job li b{color:var(--ink)}
 
 /* achievements */
-.ach{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
+.ach{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
 .ach .a{display:flex;gap:11px;background:#F7FAFC;border:1px solid var(--line);border-left:4px solid var(--gold);
   border-radius:10px;padding:16px 18px;font-size:12.6px;color:#34465a;line-height:1.55}
 .ach .a b{color:var(--ink)}
 .star{color:var(--gold);font-size:15px;flex:none}
+
+/* recommendation quote */
+.quote{position:relative;margin:14px 0 2px;background:linear-gradient(135deg,#0A1A2F,#10314f);
+  color:#dbe7f3;border-radius:12px;padding:14px 20px 13px;overflow:hidden}
+.quote .q-text{position:relative;z-index:2;font-size:13px;line-height:1.65;color:#eaf2fb;font-style:italic}
+.quote .q-text b{color:var(--cyan);font-style:normal}
+.quote .q-by{margin-top:12px;display:flex;flex-direction:column;border-top:1px solid rgba(255,255,255,.12);padding-top:10px}
+.quote .q-name{font-weight:800;font-size:12.5px;color:#fff}
+.quote .q-role{font-size:11px;color:#9fb6cc}
+.quote .q-tag{display:inline-block;margin-bottom:11px;font-size:10px;font-weight:700;letter-spacing:.09em;
+  color:var(--gold);border:1px solid rgba(246,183,60,.45);border-radius:6px;padding:4px 10px}
 
 /* mini projects (intl) */
 .mini{display:grid;grid-template-columns:1fr 1fr;gap:18px}
@@ -173,7 +184,8 @@ section{margin-bottom:34px}
   .fab{display:none}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   section{break-inside:avoid}
-  .job,.ai-card,.comp .c,.ach .a{break-inside:avoid}
+  .ai-card,.comp .c,.ach .a,.quote{break-inside:avoid}
+  .job-top,.job-desc{break-after:avoid}
   .ai-wrap,.hero{break-inside:avoid}
 }
 </style>
@@ -271,6 +283,14 @@ section{margin-bottom:34px}
             <div class="a"><span class="star">★</span><span><b>Formal recommendation letters</b> from project leads — recognised professional excellence.</span></div>
             <div class="a"><span class="star">★</span><span><b>2 years fully remote</b> across multiple US time zones and regulatory contexts.</span></div>
           </div>
+          <blockquote class="quote">
+            <span class="q-tag">★ RECOMMENDATION · CENTENE</span>
+            <p class="q-text">&ldquo;I recommend Jorge <b>without reservation</b>. Very bright and motivated — a quick learner able to digest large volumes of information, <b>troubleshoot issues</b>, work across teams and remain <b>reliable for any task</b>. He consistently articulates ideas in both verbal and written form.&rdquo;</p>
+            <div class="q-by">
+              <span class="q-name">Carl W. Blocker Jr</span>
+              <span class="q-role">IT Manager — Systems Engineering · Centene</span>
+            </div>
+          </blockquote>
         </div>
 
       </div>
