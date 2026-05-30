@@ -101,16 +101,14 @@ section{margin-bottom:24px}
 .ach .a b{color:var(--ink)}
 .star{color:var(--gold);font-size:15px;flex:none}
 
-/* recommendation quote */
-.quote{position:relative;margin:14px 0 2px;background:linear-gradient(135deg,#0A1A2F,#10314f);
-  color:#dbe7f3;border-radius:12px;padding:14px 20px 13px;overflow:hidden}
-.quote .q-text{position:relative;z-index:2;font-size:13px;line-height:1.65;color:#eaf2fb;font-style:italic}
-.quote .q-text b{color:var(--cyan);font-style:normal}
-.quote .q-by{margin-top:12px;display:flex;flex-direction:column;border-top:1px solid rgba(255,255,255,.12);padding-top:10px}
-.quote .q-name{font-weight:800;font-size:12.5px;color:#fff}
-.quote .q-role{font-size:11px;color:#9fb6cc}
-.quote .q-tag{display:inline-block;margin-bottom:11px;font-size:10px;font-weight:700;letter-spacing:.09em;
-  color:var(--gold);border:1px solid rgba(246,183,60,.45);border-radius:6px;padding:4px 10px}
+/* recommendation link (compact) */
+.rec-link{display:flex;align-items:center;gap:10px;margin:12px 0 2px;text-decoration:none;
+  background:#fffdf5;border:1px solid #F6D98A;border-radius:10px;padding:11px 15px;font-size:12.3px;
+  color:#46566a;line-height:1.45}
+.rec-link .star2{color:var(--gold);font-size:15px;flex:none}
+.rec-link b{color:#9a6b00}
+.rec-link i{color:#34465a}
+.rec-link .cta{margin-left:auto;color:#0d6e74;font-weight:800;white-space:nowrap}
 
 /* mini projects (intl) */
 .mini{display:grid;grid-template-columns:1fr 1fr;gap:18px}
@@ -184,7 +182,7 @@ section{margin-bottom:24px}
   .fab{display:none}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   section{break-inside:avoid}
-  .ai-card,.comp .c,.ach .a,.quote{break-inside:avoid}
+  .ai-card,.comp .c,.ach .a,.rec-link{break-inside:avoid}
   .job-top,.job-desc{break-after:avoid}
   .ai-wrap,.hero{break-inside:avoid}
 }
@@ -283,14 +281,11 @@ section{margin-bottom:24px}
             <div class="a"><span class="star">★</span><span><b>Formal recommendation letters</b> from project leads — recognised professional excellence.</span></div>
             <div class="a"><span class="star">★</span><span><b>2 years fully remote</b> across multiple US time zones and regulatory contexts.</span></div>
           </div>
-          <blockquote class="quote">
-            <span class="q-tag">★ RECOMMENDATION · CENTENE</span>
-            <p class="q-text">&ldquo;I recommend Jorge <b>without reservation</b>. Very bright and motivated — a quick learner able to digest large volumes of information, <b>troubleshoot issues</b>, work across teams and remain <b>reliable for any task</b>. He consistently articulates ideas in both verbal and written form.&rdquo;</p>
-            <div class="q-by">
-              <span class="q-name">Carl W. Blocker Jr</span>
-              <span class="q-role">IT Manager — Systems Engineering · Centene</span>
-            </div>
-          </blockquote>
+          <a class="rec-link" href="https://github.com/jorgeaguirre150-source/Freelance-Project-Jorge/blob/main/Recommendation_Letter.pdf" target="_blank" rel="noreferrer">
+            <span class="star2">★</span>
+            <span><b>Recommendation:</b> <i>&ldquo;I recommend Jorge without reservation&rdquo;</i> — Carl W. Blocker Jr, IT Manager, Systems Engineering &middot; Centene</span>
+            <span class="cta">Read letter &rarr;</span>
+          </a>
         </div>
 
       </div>
