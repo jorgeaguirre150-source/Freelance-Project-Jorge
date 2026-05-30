@@ -2,12 +2,12 @@
   "name": "Daily Freelance Hunter",
   "nodes": [
     {
-      "id": "461da578-cf95-4434-b306-f033919fd040",
-      "name": "Schedule Trigger 07:00",
+      "id": "1f4bbfdc-1d94-4b6a-9e31-86108600f098",
+      "name": "Cron 08:30 (busqueda)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        240,
+        200,
         300
       ],
       "parameters": {
@@ -15,19 +15,19 @@
           "interval": [
             {
               "field": "cronExpression",
-              "expression": "0 7 * * *"
+              "expression": "30 8 * * *"
             }
           ]
         }
       }
     },
     {
-      "id": "88281b9d-5e06-452f-acd4-50683e7da025",
+      "id": "6c0764ac-9075-4f08-bc55-f19cb5a72b4a",
       "name": "1. Ingest + Dedup",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        460,
+        400,
         300
       ],
       "parameters": {
@@ -37,12 +37,12 @@
       }
     },
     {
-      "id": "0ded54b5-b58e-4917-afec-7e5eb29ef5d8",
+      "id": "a3443a0e-647e-4843-9285-966570192d08",
       "name": "2. AI Score + Draft",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        680,
+        600,
         300
       ],
       "parameters": {
@@ -52,12 +52,12 @@
       }
     },
     {
-      "id": "229ceea5-ee91-48f9-8994-eb716d240549",
+      "id": "cbc48c77-f298-47b2-b055-22494d9f0254",
       "name": "3. Upsert Supabase",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        900,
+        800,
         300
       ],
       "parameters": {
@@ -67,12 +67,27 @@
       }
     },
     {
-      "id": "2bc7f7da-ab8f-4620-919d-9cdc0f1e5528",
+      "id": "bbc09b11-4714-4a56-889a-a14beced7e89",
+      "name": "Wait -> 09:00",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1000,
+        300
+      ],
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 30,
+        "unit": "minutes"
+      }
+    },
+    {
+      "id": "79e78ae7-551e-4a37-83cb-17b5695fc2a0",
       "name": "4. Build Email",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1120,
+        1200,
         300
       ],
       "parameters": {
@@ -82,12 +97,12 @@
       }
     },
     {
-      "id": "94058b77-ff6b-405c-8e87-b83aa2c2fd4c",
-      "name": "5. Send Email",
+      "id": "060c7b83-1297-4884-9463-51df85e37a8e",
+      "name": "5. Send Email 09:00",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
       "position": [
-        1340,
+        1400,
         300
       ],
       "parameters": {
@@ -101,7 +116,7 @@
     }
   ],
   "connections": {
-    "Schedule Trigger 07:00": {
+    "Cron 08:30 (busqueda)": {
       "main": [
         [
           {
@@ -138,6 +153,17 @@
       "main": [
         [
           {
+            "node": "Wait -> 09:00",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait -> 09:00": {
+      "main": [
+        [
+          {
             "node": "4. Build Email",
             "type": "main",
             "index": 0
@@ -149,7 +175,7 @@
       "main": [
         [
           {
-            "node": "5. Send Email",
+            "node": "5. Send Email 09:00",
             "type": "main",
             "index": 0
           }

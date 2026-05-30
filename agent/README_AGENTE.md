@@ -6,15 +6,20 @@ Busca cada mañana ofertas freelance Cloud/AI (EU + global), las puntúa con IA 
 
 ```mermaid
 flowchart LR
-    A[Cron 07:00] --> B[1. Ingest + Dedup<br/>Remotive·RemoteOK·Arbeitnow·Adzuna]
+    A[Cron 08:30<br/>busqueda] --> B[1. Ingest + Dedup<br/>7 fuentes globales]
     B --> C[2. AI Score + Draft<br/>Haiku puntua · Sonnet redacta]
-    C --> D[3. Build Email HTML]
-    D --> E[4. Send Email<br/>shortlist top 10 + borradores]
+    C --> S[3. Upsert Supabase]
+    S --> W[Wait 30 min]
+    W --> D[4. Build Email]
+    D --> E[5. Send Email 09:00<br/>todas las opciones]
 ```
+
+> **Horario**: la búsqueda corre a las **08:30** (cron `30 8 * * *`); un nodo **Wait** de 30 min retrasa el envío para que el reporte llegue hacia las **09:00** al correo del CV (`aguirre_coslada@hotmail.com`). Para envío a una hora exacta, cambia el Wait a modo *"At Specified Time"*.
 
 | Nodo | Qué hace |
 |------|----------|
-| Schedule Trigger | Dispara cada día a las 07:00 (cron `0 7 * * *`) |
+| Cron 08:30 | Dispara la búsqueda cada día a las 08:30 (cron `30 8 * * *`) |
+| Wait → 09:00 | Espera 30 min para que el reporte se envíe hacia las 09:00 |
 | 1. Ingest + Dedup | Fetch a 4 APIs legales, prefiltro por keywords, dedup entre días (`workflowStaticData`, caduca 30d) |
 | 2. AI Score + Draft | 1 llamada **Haiku** puntúa 0-100; filtra ≥70, top 10; 1 llamada **Sonnet** redacta borradores |
 | 3. Build Email | Genera el HTML con tarjetas (fuente, match, link, borrador) |

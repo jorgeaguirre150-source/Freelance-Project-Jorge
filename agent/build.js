@@ -11,24 +11,29 @@ const codeNode = (name, x, code) => ({
 });
 
 const nodes = [
-  { id: id(), name: 'Schedule Trigger 07:00', type: 'n8n-nodes-base.scheduleTrigger', typeVersion: 1.2, position: [240, 300],
-    parameters: { rule: { interval: [{ field: 'cronExpression', expression: '0 7 * * *' }] } } },
-  codeNode('1. Ingest + Dedup', 460, read('code_1_ingest.js')),
-  codeNode('2. AI Score + Draft', 680, read('code_2_ai.js')),
-  codeNode('3. Upsert Supabase', 900, read('code_4_supabase.js')),
-  codeNode('4. Build Email', 1120, read('code_3_email.js')),
-  { id: id(), name: '5. Send Email', type: 'n8n-nodes-base.emailSend', typeVersion: 2.1, position: [1340, 300],
+  // Dispara la BUSQUEDA a las 08:30 todos los dias
+  { id: id(), name: 'Cron 08:30 (busqueda)', type: 'n8n-nodes-base.scheduleTrigger', typeVersion: 1.2, position: [200, 300],
+    parameters: { rule: { interval: [{ field: 'cronExpression', expression: '30 8 * * *' }] } } },
+  codeNode('1. Ingest + Dedup', 400, read('code_1_ingest.js')),
+  codeNode('2. AI Score + Draft', 600, read('code_2_ai.js')),
+  codeNode('3. Upsert Supabase', 800, read('code_4_supabase.js')),
+  // Espera ~30 min -> el reporte se envia hacia las 09:00
+  { id: id(), name: 'Wait -> 09:00', type: 'n8n-nodes-base.wait', typeVersion: 1.1, position: [1000, 300],
+    parameters: { resume: 'timeInterval', amount: 30, unit: 'minutes' } },
+  codeNode('4. Build Email', 1200, read('code_3_email.js')),
+  { id: id(), name: '5. Send Email 09:00', type: 'n8n-nodes-base.emailSend', typeVersion: 2.1, position: [1400, 300],
     parameters: { fromEmail: 'aguirre_coslada@hotmail.com', toEmail: 'aguirre_coslada@hotmail.com',
       subject: '={{ $json.subject }}', emailFormat: 'html', html: '={{ $json.html }}', options: {} } }
 ];
 
 const link = (from, to) => ({ [from]: { main: [[{ node: to, type: 'main', index: 0 }]] } });
 const connections = Object.assign({},
-  link('Schedule Trigger 07:00', '1. Ingest + Dedup'),
+  link('Cron 08:30 (busqueda)', '1. Ingest + Dedup'),
   link('1. Ingest + Dedup', '2. AI Score + Draft'),
   link('2. AI Score + Draft', '3. Upsert Supabase'),
-  link('3. Upsert Supabase', '4. Build Email'),
-  link('4. Build Email', '5. Send Email')
+  link('3. Upsert Supabase', 'Wait -> 09:00'),
+  link('Wait -> 09:00', '4. Build Email'),
+  link('4. Build Email', '5. Send Email 09:00')
 );
 
 const wf = { name: 'Daily Freelance Hunter', nodes, connections, active: false, settings: { executionOrder: 'v1' } };
