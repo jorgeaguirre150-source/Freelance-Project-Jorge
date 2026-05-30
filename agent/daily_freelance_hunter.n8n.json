@@ -1,0 +1,164 @@
+{
+  "name": "Daily Freelance Hunter",
+  "nodes": [
+    {
+      "id": "461da578-cf95-4434-b306-f033919fd040",
+      "name": "Schedule Trigger 07:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "88281b9d-5e06-452f-acd4-50683e7da025",
+      "name": "1. Ingest + Dedup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// NODO 1 — Ingest GLOBAL + Normalize + Dedup  (mode: Run Once for All Items)\n// 7 fuentes legales (APIs/feeds). Prefiltro por sector. Dedup entre dias (workflowStaticData, 30d).\n\nconst http = (opts) => this.helpers.httpRequest(opts);\nconst staticData = this.getWorkflowStaticData('global');\n\n// --- Sector de Jorge (CV 2026) ---\nconst KEYWORDS = ['cloud architect','cloud engineer','platform engineer','platform architect',\n  'devops','sre','site reliability','terraform','terragrunt','kubernetes','aks','eks',\n  'aws','azure','gcp','mlops','llmops','ai infrastructure','ai platform','gpu','nvidia',\n  'infrastructure as code','solutions architect','agentic','rag'];\n\nconst ADZUNA_ID  = $env.ADZUNA_APP_ID  || '';\nconst ADZUNA_KEY = $env.ADZUNA_APP_KEY || '';\n// \"todo el mundo\": Adzuna cubre estos paises (1 call c/u). Recorta si quieres menos volumen.\nconst ADZUNA_COUNTRIES = ['gb','de','fr','es','nl','it','at','ch','pl','us','ca','au','in','sg'];\n\nasync function safe(name, fn){ try { const r = await fn(); console.log(`${name}: ${r.length}`); return r; }\n  catch(e){ console.log(`${name} ERROR:`, e.message); return []; } }\nconst strip = (s)=> (s||'').toString().replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim().slice(0,1000);\n\nlet jobs = [];\n\n// 1) Remotive\njobs = jobs.concat(await safe('Remotive', async()=>{\n  const r = await http({ url:'https://remotive.com/api/remote-jobs?search=cloud', json:true });\n  return (r.jobs||[]).map(j=>({ source:'Remotive', title:j.title, company:j.company_name,\n    location:j.candidate_required_location||'Remote', url:j.url, description:strip(j.description), salary:j.salary||'' }));\n}));\n\n// 2) RemoteOK\njobs = jobs.concat(await safe('RemoteOK', async()=>{\n  const r = await http({ url:'https://remoteok.com/api', json:true, headers:{'User-Agent':'DailyFreelanceHunter/1.0'} });\n  return (Array.isArray(r)?r.slice(1):[]).map(j=>({ source:'RemoteOK', title:j.position||j.title, company:j.company,\n    location:j.location||'Remote', url:j.url, description:strip(j.description), salary:'' }));\n}));\n\n// 3) Arbeitnow (EU)\njobs = jobs.concat(await safe('Arbeitnow', async()=>{\n  const r = await http({ url:'https://www.arbeitnow.com/api/job-board-api', json:true });\n  return (r.data||[]).map(j=>({ source:'Arbeitnow', title:j.title, company:j.company_name,\n    location:j.location||'Remote', url:j.url, description:strip(j.description), salary:'' }));\n}));\n\n// 4) Jobicy (remoto global)\njobs = jobs.concat(await safe('Jobicy', async()=>{\n  const r = await http({ url:'https://jobicy.com/api/v2/remote-jobs?count=50&tag=devops', json:true });\n  return (r.jobs||[]).map(j=>({ source:'Jobicy', title:j.jobTitle, company:j.companyName,\n    location:j.jobGeo||'Remote', url:j.url, description:strip(j.jobExcerpt), salary:'' }));\n}));\n\n// 5) Himalayas (remoto global)\njobs = jobs.concat(await safe('Himalayas', async()=>{\n  const r = await http({ url:'https://himalayas.app/jobs/api?limit=50', json:true });\n  return (r.jobs||[]).map(j=>({ source:'Himalayas', title:j.title, company:j.companyName,\n    location:(j.locationRestrictions&&j.locationRestrictions.join(', '))||'Remote',\n    url:j.applicationLink||j.url||('https://himalayas.app/jobs/'+(j.slug||'')), description:strip(j.description||j.excerpt), salary:'' }));\n}));\n\n// 6) The Muse (global, tech categories)\njobs = jobs.concat(await safe('TheMuse', async()=>{\n  const r = await http({ url:'https://www.themuse.com/api/public/jobs?category=Data%20and%20Analytics&category=Engineering&page=1', json:true });\n  return (r.results||[]).map(j=>({ source:'TheMuse', title:j.name, company:(j.company&&j.company.name)||'',\n    location:(j.locations&&j.locations.map(l=>l.name).join(', '))||'', url:(j.refs&&j.refs.landing_page)||'', description:strip(j.contents), salary:'' }));\n}));\n\n// 7) Adzuna (agregador multi-pais, requiere key)\nif(ADZUNA_ID && ADZUNA_KEY){\n  for(const c of ADZUNA_COUNTRIES){\n    jobs = jobs.concat(await safe('Adzuna-'+c, async()=>{\n      const r = await http({ url:`https://api.adzuna.com/v1/api/jobs/${c}/search/1`,\n        qs:{ app_id:ADZUNA_ID, app_key:ADZUNA_KEY, what_or:'cloud architect terraform kubernetes devops platform sre',\n             results_per_page:30, 'content-type':'application/json' }, json:true });\n      return (r.results||[]).map(j=>({ source:'Adzuna-'+c.toUpperCase(), title:j.title,\n        company:(j.company&&j.company.display_name)||'', location:(j.location&&j.location.display_name)||'',\n        url:j.redirect_url, description:strip(j.description),\n        salary:j.salary_min?`${Math.round(j.salary_min)}-${Math.round(j.salary_max)}`:'' }));\n    }));\n  }\n}\n\n// Prefiltro por sector (barato, antes de gastar tokens)\njobs = jobs.filter(j=>{ const t=((j.title||'')+' '+(j.description||'')).toLowerCase();\n  return KEYWORDS.some(k=>t.includes(k)); });\n\n// Dedup en el run + entre dias (caduca 30d)\nstaticData.seen = staticData.seen || {};\nconst now = Date.now();\nfor(const k in staticData.seen){ if(now - staticData.seen[k] > 2592000000) delete staticData.seen[k]; }\n\nconst within = new Set(); const out = [];\nfor(const j of jobs){\n  if(!j.title) continue;\n  const key = ((j.url||'') || ((j.title||'')+'|'+(j.company||''))).toLowerCase().trim();\n  if(!key || within.has(key) || staticData.seen[key]) continue;\n  within.add(key); staticData.seen[key] = now;\n  out.push(j);\n}\n\nconsole.log(`TOTAL nuevas tras dedup: ${out.length}`);\nreturn out.map(j=>({ json:j }));\n"
+      }
+    },
+    {
+      "id": "0ded54b5-b58e-4917-afec-7e5eb29ef5d8",
+      "name": "2. AI Score + Draft",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// NODO 2 — AI Score (Haiku, por lotes) + Draft (Sonnet, top) (mode: Run Once for All Items)\n// Escala a cientos de ofertas. Devuelve TODAS las relevantes (>=65) + borradores para el top 12.\n\nconst KEY  = $env.ANTHROPIC_API_KEY;\nconst http = (opts) => this.helpers.httpRequest(opts);\n\n// Verifica que sean los model IDs vigentes en tu cuenta Anthropic.\nconst MODEL_SCORE = 'claude-haiku-4-5';\nconst MODEL_DRAFT = 'claude-sonnet-4-5';\n\nconst THRESHOLD   = 65;   // match minimo para notificar\nconst DRAFT_TOP   = 12;   // cuantos borradores genera (coste)\nconst MAX_SCORE   = 200;  // tope de ofertas a puntuar/dia\nconst CHUNK       = 50;   // tamano de lote de scoring\n\n// --- Perfil de Jorge (CV 2026) ---\nconst PROFILE = `Jorge Aguirre Romero — Senior Cloud & AI Platform Architect (Madrid, remote, EU/US, open to relocation).\n15 years international IT, 5+ years enterprise cloud architecture.\nNOW: co-owner of Mercedes-Benz mAzure HUB (multi-region Azure hub-and-spoke, EMEA/APAC/NAFTA); principal architect of \"Minerva\", their NVIDIA AI factory.\nCORE: Azure, AWS (GCP/Oracle exposure); Terraform/Terragrunt; GitLab CI/CD; multi-tenant Kubernetes AKS/EKS (vCluster-style isolation); GPU platforms (NVIDIA NGC/CUDA, GPU Operator, device plugin); hybrid networking (ExpressRoute, hub-spoke, NVA NAT, DNS, peering); observability (Grafana, Prometheus, Langfuse/Phoenix).\nAI: Agentic systems & multi-agent RAG (LangChain/LangGraph, LlamaIndex, Anthropic SDK), guardrails, evals.\nREGULATED: Automotive (Mercedes), Pharma (GxP, ICH E6, 21 CFR Part 11), Healthcare (HIPAA), Banking (BBVA).\nPROOF: 30% AWS cost cut via IaC. Languages: ES native, EN C1, DE A2.\nRATE: day-rate floor 295 EUR + VAT; target 450-600 EUR/day. Prefer contract/freelance, remote, that meet/exceed the floor OR don't disclose rate. Penalize on-site-only, junior, or stack-unrelated roles.`;\n\nconst items = $input.all().map(i=>i.json);\nif(!KEY){ throw new Error('Falta ANTHROPIC_API_KEY en variables de entorno de n8n'); }\nif(items.length===0){ return [{ json:{ total:0, shortlist:[], more:[] } }]; }\n\nasync function anthropic(model, system, user, maxTokens){\n  const r = await http({ method:'POST', url:'https://api.anthropic.com/v1/messages', json:true,\n    headers:{ 'x-api-key':KEY, 'anthropic-version':'2023-06-01', 'content-type':'application/json' },\n    body:{ model, max_tokens:maxTokens, system, messages:[{ role:'user', content:user }] } });\n  return r.content[0].text;\n}\nconst parseArr = (txt)=>{ const m = txt.match(/\\[[\\s\\S]*\\]/); return m ? JSON.parse(m[0]) : []; };\n\n// ---- 1) SCORING por lotes (Haiku) ----\nconst pool = items.slice(0, MAX_SCORE);\nconst scoreSys = `You score how well freelance/contract jobs match a candidate. Return ONLY a JSON array, no prose. `+\n`Each: {\"i\":<index>,\"score\":<0-100>,\"reason\":\"<max 12 words>\"}. `+\n`High = senior cloud/platform/devops/SRE/AI-infra/GPU, remote or EU/US, contract-friendly, rate >= floor or undisclosed. `+\n`Low = junior, on-site only, unrelated stack, or rate clearly below floor.`;\n\nlet allScores = [];\nfor(let start=0; start<pool.length; start+=CHUNK){\n  const batch = pool.slice(start, start+CHUNK).map((j,k)=>({ i:start+k, title:j.title, company:j.company,\n    location:j.location, salary:j.salary, desc:(j.description||'').slice(0,400) }));\n  const user = `PROFILE:\\n${PROFILE}\\n\\nJOBS (JSON):\\n${JSON.stringify(batch)}\\n\\nReturn the JSON array of scores.`;\n  try { allScores = allScores.concat(parseArr(await anthropic(MODEL_SCORE, scoreSys, user, 3000))); }\n  catch(e){ console.log('score batch fail @'+start+':', e.message);\n    allScores = allScores.concat(batch.map(b=>({ i:b.i, score:50, reason:'fallback' }))); }\n}\n\nlet scored = pool.map((j,idx)=>{ const s = allScores.find(x=>x.i===idx) || { score:0, reason:'' };\n  return { ...j, score:s.score, reason:s.reason }; });\n\nlet relevant = scored.filter(j=>j.score>=THRESHOLD).sort((a,b)=>b.score-a.score);\nif(relevant.length===0){ relevant = scored.sort((a,b)=>b.score-a.score).slice(0,8); } // relax si 0\n\nconst shortlist = relevant.slice(0, DRAFT_TOP);\nconst more = relevant.slice(DRAFT_TOP);\n\n// ---- 2) DRAFTS (Sonnet, solo top) ----\nconst draftSys = `You write short freelance proposals (max 90 words each). Confident, specific, one quantified proof, `+\n`end with one question. Real proof: co-owner of Mercedes-Benz mAzure HUB, 30% AWS cost cut, principal architect of NVIDIA AI factory. `+\n`Match the job's language (Spanish job -> Spanish draft). Return ONLY a JSON array: [{\"i\":<index>,\"draft\":\"...\"}].`;\nconst draftInput = shortlist.map((j,idx)=>({ i:idx, title:j.title, company:j.company, desc:(j.description||'').slice(0,450) }));\nlet drafts = [];\nif(shortlist.length){\n  const user = `PROFILE:\\n${PROFILE}\\n\\nJOBS:\\n${JSON.stringify(draftInput)}\\n\\nReturn the JSON array of drafts.`;\n  try { drafts = parseArr(await anthropic(MODEL_DRAFT, draftSys, user, 4000)); }\n  catch(e){ console.log('draft fail:', e.message); }\n}\nconst finalShort = shortlist.map((j,idx)=>({ ...j, draft:(drafts.find(d=>d.i===idx)||{}).draft || '(borrador no generado — redactar manualmente)' }));\n\nconsole.log(`Relevantes: ${relevant.length} | con borrador: ${finalShort.length} | resto: ${more.length}`);\nreturn [{ json:{ total:relevant.length, shortlist:finalShort, more } }];\n"
+      }
+    },
+    {
+      "id": "229ceea5-ee91-48f9-8994-eb716d240549",
+      "name": "3. Upsert Supabase",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// NODO — Upsert a Supabase (passthrough)  (mode: Run Once for All Items)\n// Guarda todas las ofertas en la tabla `jobs` (dedup_key unico) y pasa el item al email.\nconst http = (opts) => this.helpers.httpRequest(opts);\nconst URL = $env.SUPABASE_URL;\nconst KEY = $env.SUPABASE_SERVICE_ROLE_KEY;\n\nconst d = $input.first().json;\nconst all = [].concat(d.shortlist || [], d.more || []);\n\nif(URL && KEY && all.length){\n  const rows = all.map(j=>({\n    dedup_key: ((j.url||'') || ((j.title||'')+'|'+(j.company||''))).toLowerCase().trim(),\n    source:j.source, title:j.title, company:j.company, location:j.location, url:j.url,\n    salary:j.salary, description:(j.description||'').slice(0,2000),\n    score:j.score, reason:j.reason,\n    draft: j.draft || undefined   // no sobrescribe drafts existentes si no hay uno nuevo\n  }));\n  try {\n    await http({ method:'POST', url:`${URL}/rest/v1/jobs?on_conflict=dedup_key`, json:true,\n      headers:{ apikey:KEY, Authorization:`Bearer ${KEY}`, 'Content-Type':'application/json',\n                Prefer:'resolution=merge-duplicates,return=minimal' },\n      body: rows });\n    console.log('Supabase upsert OK:', rows.length);\n  } catch(e){ console.log('Supabase ERROR:', e.message); }\n} else {\n  console.log('Supabase no configurado o 0 filas — se omite el guardado.');\n}\n\nreturn [{ json: d }]; // passthrough para Build Email\n"
+      }
+    },
+    {
+      "id": "2bc7f7da-ab8f-4620-919d-9cdc0f1e5528",
+      "name": "4. Build Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "// NODO 3 — Build Email HTML  (mode: Run Once for All Items)\n// Seccion A: shortlist con borradores. Seccion B: TODAS las demas opciones (tabla compacta).\nconst d = $input.first().json;\nconst short = d.shortlist || [];\nconst more  = d.more || [];\nconst today = new Date().toISOString().slice(0,10);\nconst esc = (s)=> (s||'').toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');\n\nconst cards = short.map((j,n)=>`\n  <div style=\"border:1px solid #e2e8f0;border-radius:10px;padding:14px 16px;margin:10px 0;\">\n    <div style=\"font-size:11px;color:#0d6e74;font-weight:700;letter-spacing:.04em;\">${esc(j.source)} &middot; MATCH ${j.score}</div>\n    <div style=\"font-size:16px;font-weight:800;color:#0A1A2F;margin:3px 0;\">${n+1}. ${esc(j.title)}</div>\n    <div style=\"font-size:13px;color:#5b6b7c;\">${esc(j.company)} &middot; ${esc(j.location)}${j.salary?(' &middot; '+esc(j.salary)):''}</div>\n    <div style=\"font-size:12px;color:#8a3b1c;margin:4px 0;font-style:italic;\">${esc(j.reason)}</div>\n    <a href=\"${esc(j.url)}\" style=\"display:inline-block;font-size:13px;color:#16C2C2;font-weight:700;text-decoration:none;margin:2px 0;\">Ver oferta y aplicar &rarr;</a>\n    <div style=\"background:#f7fafc;border-left:3px solid #16C2C2;padding:10px 12px;margin-top:8px;font-size:12.5px;color:#34465a;white-space:pre-wrap;\">${esc(j.draft)}</div>\n  </div>`).join('');\n\nconst moreRows = more.map((j)=>`\n  <tr>\n    <td style=\"padding:6px 8px;border-bottom:1px solid #eef2f7;font-weight:700;color:#0A1A2F;font-size:12px;\">${j.score}</td>\n    <td style=\"padding:6px 8px;border-bottom:1px solid #eef2f7;font-size:12px;\"><a href=\"${esc(j.url)}\" style=\"color:#0d6e74;text-decoration:none;\">${esc(j.title)}</a></td>\n    <td style=\"padding:6px 8px;border-bottom:1px solid #eef2f7;font-size:12px;color:#5b6b7c;\">${esc(j.company)}</td>\n    <td style=\"padding:6px 8px;border-bottom:1px solid #eef2f7;font-size:11px;color:#8a96a3;\">${esc(j.source)} &middot; ${esc(j.location)}</td>\n  </tr>`).join('');\n\nconst moreTable = more.length ? `\n  <h3 style=\"color:#0A1A2F;font-size:15px;margin:22px 16px 6px;\">Todas las demas opciones (${more.length})</h3>\n  <table style=\"width:calc(100% - 32px);margin:0 16px;border-collapse:collapse;\">\n    <tr style=\"text-align:left;color:#8a96a3;font-size:11px;\"><th style=\"padding:6px 8px;\">Match</th><th style=\"padding:6px 8px;\">Puesto</th><th style=\"padding:6px 8px;\">Empresa</th><th style=\"padding:6px 8px;\">Fuente</th></tr>\n    ${moreRows}\n  </table>` : '';\n\nconst html = `<div style=\"font-family:Arial,Helvetica,sans-serif;max-width:720px;margin:auto;background:#fff;\">\n  <div style=\"background:linear-gradient(120deg,#0A1A2F,#0d6e74);color:#fff;padding:22px 24px;border-radius:12px 12px 0 0;\">\n    <div style=\"font-size:20px;font-weight:800;\">Daily Freelance Hunter</div>\n    <div style=\"font-size:13px;color:#9fe6e6;\">${today} &middot; ${d.total} oportunidades relevantes (floor 295&euro;+IVA)</div>\n  </div>\n  <div style=\"padding:8px 16px 20px;\">\n    <h3 style=\"color:#0A1A2F;font-size:15px;margin:14px 0 4px;\">Top ${short.length} con borrador listo</h3>\n    ${cards || '<p style=\"color:#5b6b7c;padding:12px;\">0 ofertas hoy. Manana mas.</p>'}\n    ${moreTable}\n    <p style=\"color:#9aa7b4;font-size:11px;margin-top:22px;\">Generado automaticamente. Revisa y ajusta cada borrador antes de enviar. No se ha aplicado a nada por ti.</p>\n  </div>\n</div>`;\n\nreturn [{ json:{ html, subject:`${d.total} ofertas freelance Cloud/AI — ${today}` } }];\n"
+      }
+    },
+    {
+      "id": "94058b77-ff6b-405c-8e87-b83aa2c2fd4c",
+      "name": "5. Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        1340,
+        300
+      ],
+      "parameters": {
+        "fromEmail": "aguirre_coslada@hotmail.com",
+        "toEmail": "aguirre_coslada@hotmail.com",
+        "subject": "={{ $json.subject }}",
+        "emailFormat": "html",
+        "html": "={{ $json.html }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger 07:00": {
+      "main": [
+        [
+          {
+            "node": "1. Ingest + Dedup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Ingest + Dedup": {
+      "main": [
+        [
+          {
+            "node": "2. AI Score + Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. AI Score + Draft": {
+      "main": [
+        [
+          {
+            "node": "3. Upsert Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Upsert Supabase": {
+      "main": [
+        [
+          {
+            "node": "4. Build Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "4. Build Email": {
+      "main": [
+        [
+          {
+            "node": "5. Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
