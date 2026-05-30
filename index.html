@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jorge Aguirre Romero — Senior Cloud & AI Platform Architect</title>
+<meta name="description" content="Senior Cloud Infrastructure Architect — GPU & Agentic AI for regulated enterprises. Azure · AWS · Terraform · Kubernetes · NVIDIA.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap');
+
+:root{
+  --ink:#0A1A2F;
+  --ink2:#10243d;
+  --teal:#16C2C2;
+  --cyan:#22D3EE;
+  --accent:#FF6B4A;
+  --gold:#F6B73C;
+  --bg:#EEF2F7;
+  --card:#FFFFFF;
+  --muted:#5B6B7C;
+  --line:#E2E8F0;
+  --grad:linear-gradient(120deg,#0A1A2F 0%,#10314f 55%,#0d6e74 100%);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Manrope',-apple-system,Segoe UI,Roboto,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+.page{
+  max-width:880px;margin:44px auto;background:var(--card);
+  box-shadow:0 30px 80px rgba(10,26,47,.18);
+  border-radius:18px;overflow:hidden;
+}
+
+/* ---------- HEADER ---------- */
+.hero{position:relative;background:var(--grad);color:#fff;padding:52px 56px 46px;overflow:hidden;text-align:center}
+.hero::after{content:"";position:absolute;right:-80px;top:-80px;width:320px;height:320px;
+  background:radial-gradient(circle,rgba(34,211,238,.35),transparent 70%);border-radius:50%}
+.hero::before{content:"";position:absolute;left:-60px;bottom:-120px;width:280px;height:280px;
+  background:radial-gradient(circle,rgba(255,107,74,.25),transparent 70%);border-radius:50%}
+.hero-inner{position:relative;z-index:2;max-width:760px;margin:0 auto}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--cyan);background:rgba(34,211,238,.12);
+  padding:6px 14px;border-radius:999px;border:1px solid rgba(34,211,238,.3)}
+.dot{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 0 4px rgba(52,211,153,.25)}
+h1{font-family:'Sora',sans-serif;font-size:48px;font-weight:800;line-height:1.05;margin:22px 0 12px;letter-spacing:-.02em}
+.title{font-size:19px;font-weight:600;color:#cfe8ff;max-width:620px;margin:0 auto}
+.title b{color:var(--cyan)}
+.contact{display:flex;flex-wrap:wrap;justify-content:center;gap:12px 26px;margin-top:30px;font-size:13.5px;font-weight:500;color:#dbe7f3}
+.contact a{color:#dbe7f3;text-decoration:none;display:inline-flex;align-items:center;gap:7px}
+.contact a:hover{color:#fff}
+.ic{width:15px;height:15px;flex:none;opacity:.85}
+
+/* ---------- METRICS ---------- */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line)}
+.metric{background:#fff;padding:26px 18px;text-align:center}
+.metric .num{font-family:'Sora',sans-serif;font-size:30px;font-weight:800;
+  background:linear-gradient(120deg,#0d6e74,#16C2C2);-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1}
+.metric .lbl{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:7px;text-transform:uppercase;letter-spacing:.05em}
+
+/* ---------- BODY ---------- */
+.body{padding:42px 64px 14px}
+section{margin-bottom:34px}
+.sec-head{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.sec-head .bar{width:5px;height:26px;border-radius:3px;background:linear-gradient(var(--teal),var(--cyan))}
+.sec-head h2{font-family:'Sora',sans-serif;font-size:19px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+.lead{font-size:14.5px;color:#34465a;line-height:1.9}
+.lead b{color:var(--ink)}
+
+/* skills pills */
+.pills{display:flex;flex-wrap:wrap;gap:11px;margin-top:22px}
+.pill{font-size:12px;font-weight:600;color:#0d4f53;background:#E6FBFB;border:1px solid #BfeeEE;
+  padding:9px 15px;border-radius:8px}
+.pill.alt{color:#7a3a16;background:#FFF1EA;border-color:#ffd9c9}
+.pill.dk{color:#1c3a5e;background:#EAF2FB;border-color:#cfe0f3}
+
+/* timeline */
+.tl{position:relative;padding-left:30px}
+.tl::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.job{position:relative;margin-bottom:30px}
+.job::before{content:"";position:absolute;left:-26px;top:4px;width:14px;height:14px;border-radius:50%;
+  background:#fff;border:3px solid var(--teal);box-shadow:0 0 0 4px #E6FBFB}
+.job-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;align-items:baseline}
+.job-role{font-weight:800;font-size:15.5px;color:var(--ink)}
+.job-co{font-weight:700;font-size:14px;color:#0d6e74}
+.job-date{font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
+.job-desc{font-size:13px;color:#46586b;margin:9px 0 14px;font-style:italic}
+.job ul{list-style:none;display:grid;gap:9px}
+.job li{font-size:12.8px;color:#3a4b5c;padding-left:18px;position:relative;line-height:1.65}
+.job li::before{content:"▹";position:absolute;left:0;color:var(--teal);font-weight:700}
+.job li b{color:var(--ink)}
+
+/* achievements */
+.ach{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
+.ach .a{display:flex;gap:11px;background:#F7FAFC;border:1px solid var(--line);border-left:4px solid var(--gold);
+  border-radius:10px;padding:16px 18px;font-size:12.6px;color:#34465a;line-height:1.55}
+.ach .a b{color:var(--ink)}
+.star{color:var(--gold);font-size:15px;flex:none}
+
+/* mini projects (intl) */
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.mini .m{background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px 20px}
+.mini .m .mt{font-weight:700;font-size:13.5px;color:var(--ink)}
+.mini .m .md{font-size:12px;color:var(--muted);font-weight:600;margin:4px 0 9px}
+.mini .m p{font-size:12px;color:#46586b;line-height:1.45}
+
+/* competencies grid */
+.comp{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.comp .c{display:flex;gap:13px;align-items:flex-start;background:#F7FAFC;border:1px solid var(--line);
+  border-radius:10px;padding:12px 16px}
+.comp .c .n{font-family:'Sora',sans-serif;font-weight:800;font-size:15px;color:var(--teal);line-height:1;flex:none;width:24px}
+.comp .c .t{font-size:12.4px;color:#3a4b5c;line-height:1.45}
+.comp .c .t b{color:var(--ink)}
+
+/* AI projects feature */
+.ai-wrap{background:linear-gradient(135deg,#0A1A2F,#10314f);border-radius:14px;padding:30px 34px;color:#dbe7f3}
+.ai-wrap .ah{font-family:'Sora',sans-serif;font-size:17px;font-weight:700;color:#fff;margin-bottom:6px}
+.ai-wrap .as{font-size:12.5px;color:var(--cyan);margin-bottom:26px;font-weight:600}
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.ai-card{background:rgba(255,255,255,.05);border:1px solid rgba(34,211,238,.18);border-radius:11px;padding:18px 20px}
+.ai-card .ct{font-weight:700;font-size:13.5px;color:#fff;display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.ai-card .ct .em{font-size:15px}
+.ai-card p{font-size:11.6px;color:#aebfd1;line-height:1.6}
+.ai-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.ai-tags span{font-size:10.5px;font-weight:600;color:#0A1A2F;background:linear-gradient(120deg,#22D3EE,#16C2C2);
+  padding:4px 9px;border-radius:6px}
+.compliance{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.compliance span{font-size:10.5px;font-weight:600;color:#F6B73C;border:1px solid rgba(246,183,60,.4);
+  padding:4px 9px;border-radius:6px}
+
+/* footer bands: langs + edu */
+.two{display:grid;grid-template-columns:1fr 1.3fr;gap:48px}
+.lang{margin-bottom:18px}
+.lang .lt{display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;margin-bottom:7px}
+.lang .lt span:last-child{color:var(--muted)}
+.bar-bg{height:7px;background:var(--line);border-radius:99px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#16C2C2,#22D3EE)}
+.edu p{font-size:12.8px;color:#3a4b5c;margin-bottom:14px;line-height:1.6}
+.edu b{color:var(--ink)}
+
+/* CTA footer */
+.cta{background:var(--grad);color:#fff;text-align:center;padding:38px 40px;margin-top:0}
+.cta h3{font-family:'Sora',sans-serif;font-size:23px;font-weight:800;margin-bottom:10px}
+.cta p{font-size:13.5px;color:#cfe8ff;margin-bottom:24px;max-width:620px;margin-left:auto;margin-right:auto}
+.cta .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.cta a{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;text-decoration:none;
+  padding:11px 22px;border-radius:10px}
+.cta .primary{background:linear-gradient(120deg,#22D3EE,#16C2C2);color:#0A1A2F}
+.cta .ghost{border:1.5px solid rgba(255,255,255,.4);color:#fff}
+
+/* floating print */
+.fab{position:fixed;right:26px;bottom:26px;z-index:50;background:var(--accent);color:#fff;border:none;
+  font-family:'Manrope';font-weight:700;font-size:14px;padding:14px 22px;border-radius:99px;cursor:pointer;
+  box-shadow:0 12px 30px rgba(255,107,74,.45);display:inline-flex;align-items:center;gap:9px}
+.fab:hover{transform:translateY(-2px)}
+
+@media (max-width:680px){
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .ach,.mini,.comp,.ai-grid,.two{grid-template-columns:1fr}
+  .hero,.body{padding-left:26px;padding-right:26px}
+  h1{font-size:34px}
+}
+
+/* ---------- PRINT ---------- */
+@media print{
+  @page{size:A4;margin:0}
+  body{background:#fff}
+  .page{margin:0;box-shadow:none;border-radius:0;max-width:none}
+  .fab{display:none}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  section{break-inside:avoid}
+  .job,.ai-card,.comp .c,.ach .a{break-inside:avoid}
+  .ai-wrap,.hero{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- HERO -->
+  <header class="hero">
+    <div class="hero-inner">
+      <span class="eyebrow"><span class="dot"></span> Available for senior contracts · Remote · Global</span>
+      <h1>Jorge Aguirre Romero</h1>
+      <div class="title">Senior <b>Cloud &amp; AI Platform</b> Architect — GPU &amp; Agentic AI for Regulated Enterprises</div>
+      <div class="contact">
+        <span>📍 Madrid, Spain · Remote · Open to relocation (EU / US)</span>
+        <a href="tel:+34687172900">📞 +34 687 172 900</a>
+        <a href="mailto:aguirre_coslada@hotmail.com">✉ aguirre_coslada@hotmail.com</a>
+        <a href="https://linkedin.com/in/jorge-aguirre-romero-37233245">in/jorge-aguirre-romero</a>
+        <a href="https://github.com/jorgeaguirre150-source">github.com/jorgeaguirre150-source</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- METRICS -->
+  <div class="metrics">
+    <div class="metric"><div class="num">15</div><div class="lbl">Years International IT</div></div>
+    <div class="metric"><div class="num">5+</div><div class="lbl">Years Cloud Architecture</div></div>
+    <div class="metric"><div class="num">−30%</div><div class="lbl">AWS Cost via IaC</div></div>
+    <div class="metric"><div class="num">3</div><div class="lbl">Regions EMEA·APAC·NAFTA</div></div>
+  </div>
+
+  <div class="body">
+
+    <!-- SUMMARY -->
+    <section>
+      <div class="sec-head"><span class="bar"></span><h2>Professional Summary</h2></div>
+      <p class="lead">
+        Senior Cloud Infrastructure Architect with <b>5+ years</b> designing enterprise multi-cloud platforms (Azure, AWS),
+        built on <b>15 years</b> of international IT delivery across the EU and US. Currently co-owning the
+        <b>mAzure HUB</b> platform at <b>Mercedes-Benz</b> — a multi-region hub-and-spoke Azure environment providing
+        on-prem connectivity, shared services and <b>AI / GPU workload enablement</b>. Specialised in
+        <b>Terraform / Terragrunt</b>, multi-tenant Kubernetes (AKS / EKS, vCluster patterns), <b>GPU platform engineering</b>
+        (NVIDIA NGC / CUDA, GPU Operator) and <b>agentic AI architecture</b> (LangChain, LlamaIndex, RAG).
+        Delivered a <b>30% reduction in AWS infrastructure cost</b> through IaC adoption and module reuse.
+      </p>
+      <div class="pills">
+        <span class="pill">Azure</span><span class="pill">AWS</span><span class="pill">Terraform / Terragrunt</span>
+        <span class="pill">Kubernetes · AKS / EKS</span><span class="pill">GitLab CI/CD</span>
+        <span class="pill alt">NVIDIA NGC / CUDA</span><span class="pill alt">GPU Operator</span>
+        <span class="pill alt">Multi-Tenant GPU</span><span class="pill dk">LangChain / LangGraph</span>
+        <span class="pill dk">LlamaIndex</span><span class="pill dk">Anthropic SDK · RAG</span>
+        <span class="pill">ExpressRoute · Hub-Spoke</span><span class="pill">Prometheus · Grafana</span>
+      </div>
+    </section>
+
+    <!-- EXPERIENCE -->
+    <section>
+      <div class="sec-head"><span class="bar"></span><h2>Professional Experience</h2></div>
+      <div class="tl">
+
+        <div class="job">
+          <div class="job-top">
+            <div><span class="job-role">Senior Cloud Infrastructure Architect</span> · <span class="job-co">Mercedes-Benz (mHUB Team)</span></div>
+            <span class="job-date">Dec 2022 – Present · Stuttgart (Remote)</span>
+          </div>
+          <p class="job-desc">Lead digital-transformation within a multi-cloud strategy — security, automation and operational efficiency.</p>
+          <ul>
+            <li><b>Terraform &amp; Terragrunt</b> — reusable modules (networking, firewalls, VMSS, DNS, spoke peering) adopted across MBM product teams.</li>
+            <li><b>Multi-tenant Kubernetes &amp; GPU</b> — tenant-spoke isolation on AKS/EKS (vCluster-style); self-service GPU environments under enterprise compliance.</li>
+            <li><b>Minerva — NVIDIA AI Factory</b> — principal architect: GPU Operator, NVIDIA device plugin, per-tenant GPU scheduling, identity-bound secure runtime for agentic workloads.</li>
+            <li><b>GitLab CI/CD</b> — IaC validate/plan/deploy pipelines enforcing security &amp; compliance baselines across all environments.</li>
+            <li><b>Multi-cloud delivery</b> — Azure (primary), AWS (production), GCP (exposure) across EMEA / APAC / NAFTA.</li>
+          </ul>
+          <div class="ach">
+            <div class="a"><span class="star">★</span><span><b>Principal architect — Minerva:</b> Mercedes-Benz AI-factory pattern for GPU workload enablement on NVIDIA NGC/CUDA.</span></div>
+            <div class="a"><span class="star">★</span><span><b>−30% AWS infrastructure cost</b> through IaC adoption and module reuse.</span></div>
+            <div class="a"><span class="star">★</span><span><b>Co-owner of mAzure HUB</b> — multi-tenant shared services for spokes across EMEA / APAC / NAFTA.</span></div>
+            <div class="a"><span class="star">★</span><span>Observability with <b>Grafana / Prometheus</b>; post-mortem &amp; DevOps culture embedded day-to-day.</span></div>
+          </div>
+        </div>
+
+        <div class="job">
+          <div class="job-top">
+            <div><span class="job-role">Cloud Infrastructure Architect</span> · <span class="job-co">Centene (USA · Healthcare)</span></div>
+            <span class="job-date">Oct 2020 – Nov 2022 · Remote</span>
+          </div>
+          <p class="job-desc">Fortune 500 US healthcare — led cloud adoption and CI/CD for mission-critical workloads (HIPAA).</p>
+          <ul>
+            <li><b>Terraform &amp; Ansible</b> — IaC provisioning + configuration; automated complex lifecycles and deployments.</li>
+            <li><b>Application delivery</b> — JFrog Artifactory for artifact traceability, Oracle WebLogic for API admin on HA Linux/Windows estates.</li>
+            <li><b>Critical production</b> — expert support across Azure workloads and VMware vSphere; multi-cloud (Azure, AWS, Oracle, GCP).</li>
+          </ul>
+          <div class="ach">
+            <div class="a"><span class="star">★</span><span><b>Formal recommendation letters</b> from project leads — recognised professional excellence.</span></div>
+            <div class="a"><span class="star">★</span><span><b>2 years fully remote</b> across multiple US time zones and regulatory contexts.</span></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- INTERNATIONAL -->
+    <section>
+      <div class="sec-head"><span class="bar"></span><h2>International Projects</h2></div>
+      <div class="mini">
+        <div class="m"><div class="mt">European Medicines Agency — Amsterdam</div><div class="md">Freelance · Mar 2017 – Sep 2020 · Regulated Pharma (GxP)</div><p>IT &amp; AV infrastructure for a regulated EU pharma agency during the post-Brexit relocation.</p></div>
+        <div class="m"><div class="mt">AB InBev APAC — Belgium</div><div class="md">Freelance · Feb 2014 – Jan 2017</div><p>Advanced L2/L3 support &amp; administration for 500+ corporate users at APAC HQ.</p></div>
+        <div class="m"><div class="mt">BT Group — London</div><div class="md">Mar 2012 – Jan 2014</div><p>Enterprise videoconferencing &amp; advanced communication technology for a high-profile delivery.</p></div>
+        <div class="m"><div class="mt">BBVA — Madrid</div><div class="md">Jan 2007 – Feb 2012 · Banking</div><p>Foundational IT support: administration of infrastructure for 500+ banking users.</p></div>
+      </div>
+    </section>
+
+    <!-- AI PROJECTS FEATURE -->
+    <section>
+      <div class="sec-head"><span class="bar"></span><h2>Strategic AI — Minerva &amp; Pharma Optima</h2></div>
+      <div class="ai-wrap">
+        <div class="ah">Functional Design &amp; Agentic Implementation</div>
+        <div class="as">Minerva (Mercedes-Benz · Enterprise Agentic AI) &nbsp;|&nbsp; Pharma Optima (Independent R&amp;D · Regulated AI · 2024–Present)</div>
+        <div class="ai-grid">
+          <div class="ai-card"><div class="ct"><span class="em">🎫</span>ServiceNow Integration</div><p>AI agents for autonomous request creation &amp; incident triage — reason over CMDB, apply routing rules, escalate to humans below a confidence threshold.</p></div>
+          <div class="ai-card"><div class="ct"><span class="em">📑</span>Validated Document AI</div><p>Multi-agent RAG for clinical data extraction with GxP verifiability: planner / retriever / extractor / verifier; every decision logged with prompt + model version + citations.</p></div>
+          <div class="ai-card"><div class="ct"><span class="em">⚡</span>GPU Orchestration</div><p>Agent workloads on NVIDIA NGC/CUDA via mAzure HUB — private endpoints, identity-bound access, per-tenant isolation. One paved road for open-weights &amp; hosted endpoints.</p></div>
+          <div class="ai-card"><div class="ct"><span class="em">🛡️</span>Risk Monitoring</div><p>Autonomous signal detection aligned with ICH E6 — protocol deviations, adverse-event signals &amp; data-integrity alerts feeding the GxP audit trail.</p></div>
+        </div>
+        <div class="ai-tags">
+          <span>Claude</span><span>GPT-4o</span><span>Llama 3</span><span>LangChain / LangGraph</span>
+          <span>LlamaIndex</span><span>Anthropic SDK</span><span>NVIDIA NGC / CUDA</span>
+          <span>GPU Operator</span><span>vCluster / Multi-Tenant K8s</span><span>Run:AI / Ray / Jupyter</span>
+          <span>Azure / Terraform</span><span>Langfuse / Phoenix</span>
+        </div>
+        <div class="compliance">
+          <span>GxP</span><span>ICH E6 R2</span><span>GDPR</span><span>21 CFR Part 11</span><span>ISO 27001</span><span>HIPAA</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPETENCIES -->
+    <section>
+      <div class="sec-head"><span class="bar"></span><h2>Core Competencies</h2></div>
+      <div class="comp">
+        <div class="c"><span class="n">01</span><span class="t"><b>Architectural Design</b> — multi-region hub-and-spoke across Azure, AWS, Oracle.</span></div>
+        <div class="c"><span class="n">02</span><span class="t"><b>Multi-Tenant K8s &amp; GPU</b> — AKS/EKS at scale, vCluster patterns, GPU Operator, device plugin.</span></div>
+        <div class="c"><span class="n">03</span><span class="t"><b>AI Factory &amp; GPU Infra</b> — self-service tenant clusters, bare-metal &amp; cloud-GPU enablement.</span></div>
+        <div class="c"><span class="n">04</span><span class="t"><b>Infrastructure as Code</b> — Terraform, Terragrunt, GitLab CI/CD, reusable enterprise modules.</span></div>
+        <div class="c"><span class="n">05</span><span class="t"><b>Hybrid Cloud &amp; Networking</b> — ExpressRoute, hub-spoke, NVA NAT, DNS extended, peering.</span></div>
+        <div class="c"><span class="n">06</span><span class="t"><b>AI Solution Architecture</b> — multi-agent systems, RAG pipelines, GPU workload enablement.</span></div>
+        <div class="c"><span class="n">07</span><span class="t"><b>Agentic AI Stack</b> — LangChain, LlamaIndex, Anthropic SDK, tool use, evals on regulated workloads.</span></div>
+        <div class="c"><span class="n">08</span><span class="t"><b>Security &amp; Regulated Env.</b> — Automotive, Pharma (GxP), Healthcare (HIPAA), Banking.</span></div>
+        <div class="c"><span class="n">09</span><span class="t"><b>Monitoring &amp; Observability</b> — Grafana, Prometheus, Langfuse / Phoenix on Kubernetes.</span></div>
+        <div class="c"><span class="n">10</span><span class="t"><b>Enterprise Intl Delivery</b> — EMEA / APAC / NAFTA governance &amp; compliance.</span></div>
+      </div>
+    </section>
+
+    <!-- LANGS + EDU -->
+    <section>
+      <div class="two">
+        <div>
+          <div class="sec-head"><span class="bar"></span><h2>Languages</h2></div>
+          <div class="lang"><div class="lt"><span>Spanish</span><span>Native</span></div><div class="bar-bg"><div class="bar-fill" style="width:100%"></div></div></div>
+          <div class="lang"><div class="lt"><span>English</span><span>C1</span></div><div class="bar-bg"><div class="bar-fill" style="width:85%"></div></div></div>
+          <div class="lang"><div class="lt"><span>German</span><span>A2 · improving</span></div><div class="bar-bg"><div class="bar-fill" style="width:35%"></div></div></div>
+        </div>
+        <div>
+          <div class="sec-head"><span class="bar"></span><h2>Education &amp; Training</h2></div>
+          <div class="edu">
+            <p><b>Higher Education — Network Security (CISCO)</b> · 2005–2007</p>
+            <p><b>Higher Education — IT &amp; Telecommunications</b> · 2005–2008</p>
+            <p><b>AI / GenAI Architecture</b> — LangChain, LlamaIndex, RAG, agentic systems.</p>
+            <p><b>AZ-305 — Azure Solutions Architect Expert</b> · in progress.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /body -->
+
+  <!-- CTA -->
+  <div class="cta">
+    <h3>Let's build your cloud &amp; AI platform.</h3>
+    <p>Available for senior architecture engagements — Cloud platforms, GPU/AI infrastructure &amp; Agentic AI for regulated industries.</p>
+    <div class="btns">
+      <a class="primary" href="mailto:aguirre_coslada@hotmail.com">✉ aguirre_coslada@hotmail.com</a>
+      <a class="ghost" href="tel:+34687172900">📞 +34 687 172 900</a>
+      <a class="ghost" href="https://linkedin.com/in/jorge-aguirre-romero-37233245">LinkedIn</a>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<button class="fab" onclick="window.print()">⬇ Download PDF</button>
+
+</body>
+</html>
