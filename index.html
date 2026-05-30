@@ -63,8 +63,8 @@ h1{font-family:'Sora',sans-serif;font-size:48px;font-weight:800;line-height:1.05
 .metric .lbl{font-size:11.5px;font-weight:600;color:var(--muted);margin-top:7px;text-transform:uppercase;letter-spacing:.05em}
 
 /* ---------- BODY ---------- */
-.body{padding:34px 64px 10px}
-section{margin-bottom:24px}
+.body{padding:42px 64px 14px}
+section{margin-bottom:34px}
 .sec-head{display:flex;align-items:center;gap:12px;margin-bottom:28px}
 .sec-head .bar{width:5px;height:26px;border-radius:3px;background:linear-gradient(var(--teal),var(--cyan))}
 .sec-head h2{font-family:'Sora',sans-serif;font-size:19px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
@@ -81,7 +81,7 @@ section{margin-bottom:24px}
 /* timeline */
 .tl{position:relative;padding-left:30px}
 .tl::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:2px;background:var(--line)}
-.job{position:relative;margin-bottom:22px}
+.job{position:relative;margin-bottom:30px}
 .job::before{content:"";position:absolute;left:-26px;top:4px;width:14px;height:14px;border-radius:50%;
   background:#fff;border:3px solid var(--teal);box-shadow:0 0 0 4px #E6FBFB}
 .job-top{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px;align-items:baseline}
@@ -95,20 +95,25 @@ section{margin-bottom:24px}
 .job li b{color:var(--ink)}
 
 /* achievements */
-.ach{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.ach{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}
 .ach .a{display:flex;gap:11px;background:#F7FAFC;border:1px solid var(--line);border-left:4px solid var(--gold);
   border-radius:10px;padding:16px 18px;font-size:12.6px;color:#34465a;line-height:1.55}
 .ach .a b{color:var(--ink)}
 .star{color:var(--gold);font-size:15px;flex:none}
 
-/* recommendation link (compact) */
-.rec-link{display:flex;align-items:center;gap:10px;margin:12px 0 2px;text-decoration:none;
-  background:#fffdf5;border:1px solid #F6D98A;border-radius:10px;padding:11px 15px;font-size:12.3px;
-  color:#46566a;line-height:1.45}
-.rec-link .star2{color:var(--gold);font-size:15px;flex:none}
-.rec-link b{color:#9a6b00}
-.rec-link i{color:#34465a}
-.rec-link .cta{margin-left:auto;color:#0d6e74;font-weight:800;white-space:nowrap}
+/* recommendation button + letter annex */
+.rec-btn{display:inline-flex;align-items:center;gap:8px;margin-top:10px;text-decoration:none;
+  background:linear-gradient(120deg,#16C2C2,#0d6e74);color:#fff;font-weight:800;font-size:11.5px;
+  letter-spacing:.02em;padding:9px 16px;border-radius:9px}
+.letter{page-break-before:always;padding:60px 70px;color:#1f2d3d}
+.letter .lh{margin-bottom:32px;border-left:4px solid var(--teal);padding-left:14px}
+.letter .lh .n{font-weight:800;font-size:15px;color:var(--ink)}
+.letter .lh .m{font-size:12.5px;color:var(--muted)}
+.letter .badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--teal);
+  background:#E6FBFB;border:1px solid #BfeeEE;border-radius:6px;padding:4px 10px;margin-bottom:24px}
+.letter p{font-size:13px;line-height:1.75;margin-bottom:14px;color:#2f3e4f}
+.letter .sign{margin-top:26px}
+.letter .sign b{color:var(--ink)}
 
 /* mini projects (intl) */
 .mini{display:grid;grid-template-columns:1fr 1fr;gap:18px}
@@ -182,8 +187,7 @@ section{margin-bottom:24px}
   .fab{display:none}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   section{break-inside:avoid}
-  .ai-card,.comp .c,.ach .a,.rec-link{break-inside:avoid}
-  .job-top,.job-desc{break-after:avoid}
+  .job,.ai-card,.comp .c,.ach .a{break-inside:avoid}
   .ai-wrap,.hero{break-inside:avoid}
 }
 </style>
@@ -281,11 +285,7 @@ section{margin-bottom:24px}
             <div class="a"><span class="star">★</span><span><b>Formal recommendation letters</b> from project leads — recognised professional excellence.</span></div>
             <div class="a"><span class="star">★</span><span><b>2 years fully remote</b> across multiple US time zones and regulatory contexts.</span></div>
           </div>
-          <a class="rec-link" href="https://github.com/jorgeaguirre150-source/Freelance-Project-Jorge/blob/main/Recommendation_Letter.pdf" target="_blank" rel="noreferrer">
-            <span class="star2">★</span>
-            <span><b>Recommendation:</b> <i>&ldquo;I recommend Jorge without reservation&rdquo;</i> — Carl W. Blocker Jr, IT Manager, Systems Engineering &middot; Centene</span>
-            <span class="cta">Read letter &rarr;</span>
-          </a>
+          <a class="rec-btn" href="#recommendation">&#9733; View Recommendation Letter — Centene &rarr;</a>
         </div>
 
       </div>
@@ -376,6 +376,23 @@ section{margin-bottom:24px}
       <a class="ghost" href="https://linkedin.com/in/jorge-aguirre-romero-37233245">LinkedIn</a>
     </div>
   </div>
+
+  <!-- ANEXO: Carta de recomendación (el botón de arriba salta aquí) -->
+  <section class="letter" id="recommendation">
+    <div class="lh">
+      <div class="n">Carl W. Blocker Jr</div>
+      <div class="m">carl.w.blockerjr@centene.com</div>
+      <div class="m">IT Manager — Systems Engineering</div>
+      <div class="m">Centene</div>
+    </div>
+    <span class="badge">LETTER OF RECOMMENDATION</span>
+    <p>To whom it may concern,</p>
+    <p>It is my pleasure to recommend Jorge Aguirre for employment with your organization. I have known Jorge for almost two years during which time he worked as a Systems Engineer for my team.</p>
+    <p>I have been consistently impressed with Jorge's attitude and productivity during the time that he has worked for the team.</p>
+    <p>Jorge is both very bright and quite motivated. I am confident that he will devote himself to a position with your organization with a high degree of diligence. He is a quick learner and has shown the ability to digest large volumes of information. He has also shown to be able to troubleshoot issues, work with other teams, and always a reliable person for any task assigned to him. Jorge has repeatedly demonstrated the ability to articulate information and ideas in both verbal and written forms.</p>
+    <p>I recommend Jorge without reservation. Please let me know if you have need for additional information.</p>
+    <p class="sign">Sincerely,<br><b>Carl W. Blocker Jr</b></p>
+  </section>
 
 </div><!-- /page -->
 
