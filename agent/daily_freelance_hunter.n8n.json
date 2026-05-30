@@ -2,7 +2,7 @@
   "name": "Daily Freelance Hunter",
   "nodes": [
     {
-      "id": "55e5fb92-19a8-4b13-967f-86aabcd72523",
+      "id": "949b76f8-a67d-48fb-8ada-dfa0ead56af0",
       "name": "Cron 08:30 (busqueda)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -22,7 +22,7 @@
       }
     },
     {
-      "id": "15725c4e-ebe0-4e3b-b9fe-65817b57c9c4",
+      "id": "877bb0e1-9e6c-420d-a73e-c23d15fa887d",
       "name": "1. Ingest + Dedup",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -37,7 +37,7 @@
       }
     },
     {
-      "id": "7773c1a1-fbb4-4fed-a2b0-9520079b75f5",
+      "id": "7620aede-8ac4-4bc0-978e-08c85448b617",
       "name": "2. AI Score + Draft",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -48,11 +48,11 @@
       "parameters": {
         "mode": "runOnceForAllItems",
         "language": "javaScript",
-        "jsCode": "// NODO 2 — AI Score (Haiku, por lotes) + Draft (Sonnet) + Calibracion + Premium\n// Devuelve: premium (empresas top, freelance O fijo), shortlist (resto con borrador), more (tabla).\n\nconst KEY  = $env.ANTHROPIC_API_KEY;\nconst http = (opts) => this.helpers.httpRequest(opts);\n\nconst MODEL_SCORE = 'claude-haiku-4-5';   // verifica IDs vigentes en tu cuenta\nconst MODEL_DRAFT = 'claude-sonnet-4-5';\n\nconst THRESHOLD = 65;   // match minimo para notificar (no aplica a premium)\nconst DRAFT_TOP = 10;   // borradores para el resto (no-premium)\nconst PREM_TOP  = 15;   // cuantas premium mostrar\nconst PREM_DRAFT= 6;    // borradores para premium\nconst MAX_SCORE = 220;\nconst CHUNK     = 50;\n\nconst PROFILE = `Jorge Aguirre Romero — Senior Cloud & AI Platform Architect (Madrid, remote, EU/US, open to relocation).\n15 years international IT, 5+ years enterprise cloud architecture.\nNOW: co-owner of Mercedes-Benz mAzure HUB; principal architect of \"Minerva\", their NVIDIA AI factory.\nCORE: Azure, AWS; Terraform/Terragrunt; GitLab CI/CD; multi-tenant Kubernetes AKS/EKS; GPU (NVIDIA NGC/CUDA, GPU Operator); hybrid networking; Grafana/Prometheus.\nAI: Agentic & multi-agent RAG (LangChain/LangGraph, LlamaIndex, Anthropic SDK), guardrails, evals.\nREGULATED: Automotive, Pharma (GxP/21 CFR Part 11), Healthcare (HIPAA), Banking.\nPROOF: 30% AWS cost cut via IaC. Languages: ES native, EN C1, DE A2.\nRATE: freelance day-rate floor 295 EUR + VAT (target 450-600). Prefer contract OR undisclosed rate.`;\n\nconst items = $input.all().map(i=>i.json);\nif(!KEY){ throw new Error('Falta ANTHROPIC_API_KEY en variables de entorno de n8n'); }\nif(items.length===0){ return [{ json:{ total:0, premium:[], shortlist:[], more:[] } }]; }\n\nasync function anthropic(model, system, user, maxTokens){\n  const r = await http({ method:'POST', url:'https://api.anthropic.com/v1/messages', json:true,\n    headers:{ 'x-api-key':KEY, 'anthropic-version':'2023-06-01', 'content-type':'application/json' },\n    body:{ model, max_tokens:maxTokens, system, messages:[{ role:'user', content:user }] } });\n  return r.content[0].text;\n}\nconst parseArr = (txt)=>{ const m = txt.match(/\\[[\\s\\S]*\\]/); return m ? JSON.parse(m[0]) : []; };\n\n// ---- CALIBRACION: aprende tu gusto (feedback 👍/👎) ----\nconst SB_URL = $env.SUPABASE_URL;\nconst SB_KEY = $env.SUPABASE_SERVICE_ROLE_KEY;\nasync function fbExamples(v){\n  if(!SB_URL || !SB_KEY) return [];\n  try{\n    const r = await http({ url:`${SB_URL}/rest/v1/jobs?feedback=eq.${v}&select=title,company,location&order=created_at.desc&limit=12`,\n      headers:{ apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}` }, json:true });\n    return Array.isArray(r) ? r : [];\n  }catch(e){ console.log('feedback fetch fail:', e.message); return []; }\n}\nconst liked = await fbExamples('up');\nconst disliked = await fbExamples('down');\nconst fmt = (a)=> a.map(x=>`- ${x.title} @ ${x.company||'?'} (${x.location||'?'})`).join('\\n');\nconst CAL = (liked.length || disliked.length)\n  ? `\\n\\nCALIBRATION — learn from past feedback. Boost similar to LIKED, penalize similar to DISLIKED.\\nLIKED:\\n${fmt(liked)||'(none)'}\\nDISLIKED:\\n${fmt(disliked)||'(none)'}`\n  : '';\nconsole.log(`Calibracion: ${liked.length} 👍 / ${disliked.length} 👎`);\n\n// ---- 1) SCORING por lotes (Haiku) ----\nconst pool = items.slice(0, MAX_SCORE);\nconst scoreSys = `You score how well freelance/contract jobs match a candidate. Return ONLY a JSON array, no prose. `+\n`Each: {\"i\":<index>,\"score\":<0-100>,\"reason\":\"<max 12 words>\"}. `+\n`High = senior cloud/platform/devops/SRE/AI-infra/GPU, remote or EU/US, contract-friendly, rate >= floor or undisclosed. `+\n`Low = junior, on-site only, unrelated stack, or rate clearly below floor. `+\n`IMPORTANT: jobs with \"premium\":true are at the candidate's TOP target companies — he accepts BOTH freelance/contract AND permanent there; give a strong boost and do NOT penalize full-time/permanent.`;\n\nlet allScores = [];\nfor(let start=0; start<pool.length; start+=CHUNK){\n  const batch = pool.slice(start, start+CHUNK).map((j,k)=>({ i:start+k, premium:!!j.premium, title:j.title,\n    company:j.company, location:j.location, salary:j.salary, desc:(j.description||'').slice(0,400) }));\n  const user = `PROFILE:\\n${PROFILE}${CAL}\\n\\nJOBS (JSON):\\n${JSON.stringify(batch)}\\n\\nReturn the JSON array of scores.`;\n  try { allScores = allScores.concat(parseArr(await anthropic(MODEL_SCORE, scoreSys, user, 3000))); }\n  catch(e){ console.log('score batch fail @'+start+':', e.message);\n    allScores = allScores.concat(batch.map(b=>({ i:b.i, score:b.premium?75:50, reason:'fallback' }))); }\n}\n\nconst scored = pool.map((j,idx)=>{ const s = allScores.find(x=>x.i===idx) || { score:0, reason:'' };\n  return { ...j, score:s.score, reason:s.reason }; });\n\n// Premium: TODAS las de empresas top (sin umbral), por score\nconst premiumJobs = scored.filter(j=>j.premium).sort((a,b)=>b.score-a.score).slice(0, PREM_TOP);\n// Resto: solo >= umbral\nlet relevant = scored.filter(j=>!j.premium && j.score>=THRESHOLD).sort((a,b)=>b.score-a.score);\nif(relevant.length===0 && premiumJobs.length===0){ relevant = scored.sort((a,b)=>b.score-a.score).slice(0,8); }\nconst shortlist = relevant.slice(0, DRAFT_TOP);\nconst more = relevant.slice(DRAFT_TOP);\n\n// ---- 2) DRAFTS (Sonnet) para premium top + shortlist (dedup por url) ----\nconst draftPoolRaw = [...premiumJobs.slice(0, PREM_DRAFT), ...shortlist];\nconst seenK = new Set(); const draftPool = [];\nfor(const j of draftPoolRaw){ const k=(j.url||j.title); if(seenK.has(k)) continue; seenK.add(k); draftPool.push(j); }\n\nconst draftSys = `You write short freelance/role proposals (max 90 words). Confident, specific, one quantified proof, `+\n`end with one question. Real proof: co-owner of Mercedes-Benz mAzure HUB, 30% AWS cost cut, principal architect of NVIDIA AI factory. `+\n`Match the job's language. Return ONLY a JSON array: [{\"i\":<index>,\"draft\":\"...\"}].`;\nlet drafts = [];\nif(draftPool.length){\n  const dInput = draftPool.map((j,idx)=>({ i:idx, title:j.title, company:j.company, desc:(j.description||'').slice(0,450) }));\n  try { drafts = parseArr(await anthropic(MODEL_DRAFT, draftSys, `PROFILE:\\n${PROFILE}\\n\\nJOBS:\\n${JSON.stringify(dInput)}\\n\\nReturn the JSON array of drafts.`, 4000)); }\n  catch(e){ console.log('draft fail:', e.message); }\n}\nconst byKey = {};\ndraftPool.forEach((j,idx)=>{ byKey[j.url||j.title] = (drafts.find(d=>d.i===idx)||{}).draft || null; });\nconst attach = (j)=>({ ...j, draft: byKey[j.url||j.title] || j.draft || null });\n\nconst premiumOut = premiumJobs.map(attach);\nconst shortlistOut = shortlist.map(attach);\n\nconsole.log(`Premium: ${premiumOut.length} | shortlist: ${shortlistOut.length} | more: ${more.length}`);\nreturn [{ json:{ total: relevant.length + premiumJobs.length, premium: premiumOut, shortlist: shortlistOut, more } }];\n"
+        "jsCode": "// NODO 2 — AI Score (Haiku, por lotes) + Draft (Sonnet) + Calibracion + Premium\n// Devuelve: premium (empresas top, freelance O fijo), shortlist (resto con borrador), more (tabla).\n\nconst KEY  = $env.ANTHROPIC_API_KEY;\nconst http = (opts) => this.helpers.httpRequest(opts);\n\nconst MODEL_SCORE = 'claude-haiku-4-5';   // verifica IDs vigentes en tu cuenta\nconst MODEL_DRAFT = 'claude-sonnet-4-5';\n\nconst THRESHOLD = 65;   // match minimo para notificar (no aplica a premium)\nconst DRAFT_TOP = 10;   // borradores para el resto (no-premium)\nconst PREM_TOP  = 15;   // cuantas premium mostrar\nconst PREM_DRAFT= 6;    // borradores para premium\nconst MAX_SCORE = 220;\nconst CHUNK     = 50;\n\nconst PROFILE = `Jorge Aguirre Romero — Senior Cloud & AI Platform Architect (Madrid, remote, EU/US, open to relocation).\n15 years international IT, 5+ years enterprise cloud architecture.\nNOW: co-owner of Mercedes-Benz mAzure HUB; principal architect of \"Minerva\", their NVIDIA AI factory.\nCORE: Azure, AWS; Terraform/Terragrunt; GitLab CI/CD; multi-tenant Kubernetes AKS/EKS; GPU (NVIDIA NGC/CUDA, GPU Operator); hybrid networking; Grafana/Prometheus.\nAI: Agentic & multi-agent RAG (LangChain/LangGraph, LlamaIndex, Anthropic SDK), guardrails, evals.\nREGULATED: Automotive, Pharma (GxP/21 CFR Part 11), Healthcare (HIPAA), Banking.\nPROOF: 30% AWS cost cut via IaC. Languages: ES native, EN C1, DE A2.\nRATE: freelance day-rate floor 295 EUR + VAT (target 450-600). Prefer contract OR undisclosed rate.`;\n\nconst items = $input.all().map(i=>i.json);\nif(!KEY){ throw new Error('Falta ANTHROPIC_API_KEY en variables de entorno de n8n'); }\nif(items.length===0){ return [{ json:{ total:0, premium:[], shortlist:[], more:[] } }]; }\n\nasync function anthropic(model, system, user, maxTokens){\n  const r = await http({ method:'POST', url:'https://api.anthropic.com/v1/messages', json:true,\n    headers:{ 'x-api-key':KEY, 'anthropic-version':'2023-06-01', 'content-type':'application/json' },\n    body:{ model, max_tokens:maxTokens, system, messages:[{ role:'user', content:user }] } });\n  return r.content[0].text;\n}\nconst parseArr = (txt)=>{ const m = txt.match(/\\[[\\s\\S]*\\]/); return m ? JSON.parse(m[0]) : []; };\n\n// ---- CALIBRACION: aprende tu gusto (feedback 👍/👎) ----\nconst SB_URL = $env.SUPABASE_URL;\nconst SB_KEY = $env.SUPABASE_SERVICE_ROLE_KEY;\nasync function fbExamples(v){\n  if(!SB_URL || !SB_KEY) return [];\n  try{\n    const r = await http({ url:`${SB_URL}/rest/v1/jobs?feedback=eq.${v}&select=title,company,location&order=created_at.desc&limit=12`,\n      headers:{ apikey:SB_KEY, Authorization:`Bearer ${SB_KEY}` }, json:true });\n    return Array.isArray(r) ? r : [];\n  }catch(e){ console.log('feedback fetch fail:', e.message); return []; }\n}\nconst liked = await fbExamples('up');\nconst disliked = await fbExamples('down');\nconst fmt = (a)=> a.map(x=>`- ${x.title} @ ${x.company||'?'} (${x.location||'?'})`).join('\\n');\nconst CAL = (liked.length || disliked.length)\n  ? `\\n\\nCALIBRATION — learn from past feedback. Boost similar to LIKED, penalize similar to DISLIKED.\\nLIKED:\\n${fmt(liked)||'(none)'}\\nDISLIKED:\\n${fmt(disliked)||'(none)'}`\n  : '';\nconsole.log(`Calibracion: ${liked.length} 👍 / ${disliked.length} 👎`);\n\n// ---- 1) SCORING por lotes (Haiku) ----\nconst pool = items.slice(0, MAX_SCORE);\nconst scoreSys = `You score how well freelance/contract jobs match a candidate. Return ONLY a JSON array, no prose. `+\n`Each: {\"i\":<index>,\"score\":<0-100>,\"reason\":\"<max 12 words>\"}. `+\n`High = senior cloud/platform/devops/SRE/AI-infra/GPU, remote or EU/US, contract-friendly, rate >= floor or undisclosed. `+\n`Low = junior, on-site only, unrelated stack, or rate clearly below floor. `+\n`IMPORTANT: jobs with \"premium\":true are at the candidate's TOP target companies — he accepts BOTH freelance/contract AND permanent there; give a strong boost and do NOT penalize full-time/permanent.`;\n\nlet allScores = [];\nfor(let start=0; start<pool.length; start+=CHUNK){\n  const batch = pool.slice(start, start+CHUNK).map((j,k)=>({ i:start+k, premium:!!j.premium, title:j.title,\n    company:j.company, location:j.location, salary:j.salary, desc:(j.description||'').slice(0,400) }));\n  const user = `PROFILE:\\n${PROFILE}${CAL}\\n\\nJOBS (JSON):\\n${JSON.stringify(batch)}\\n\\nReturn the JSON array of scores.`;\n  try { allScores = allScores.concat(parseArr(await anthropic(MODEL_SCORE, scoreSys, user, 3000))); }\n  catch(e){ console.log('score batch fail @'+start+':', e.message);\n    allScores = allScores.concat(batch.map(b=>({ i:b.i, score:b.premium?75:50, reason:'fallback' }))); }\n}\n\nconst scored = pool.map((j,idx)=>{ const s = allScores.find(x=>x.i===idx) || { score:0, reason:'' };\n  return { ...j, score:s.score, reason:s.reason }; });\n\n// Premium: TODAS las de empresas top (sin umbral), por score\nconst premiumJobs = scored.filter(j=>j.premium).sort((a,b)=>b.score-a.score).slice(0, PREM_TOP);\n// Resto: solo >= umbral\nlet relevant = scored.filter(j=>!j.premium && j.score>=THRESHOLD).sort((a,b)=>b.score-a.score);\nif(relevant.length===0 && premiumJobs.length===0){ relevant = scored.sort((a,b)=>b.score-a.score).slice(0,8); }\nconst shortlist = relevant.slice(0, DRAFT_TOP);\nconst more = relevant.slice(DRAFT_TOP);\n\n// ---- 2) DRAFTS (Sonnet) para premium top + shortlist (dedup por url) ----\nconst draftPoolRaw = [...premiumJobs.slice(0, PREM_DRAFT), ...shortlist];\nconst seenK = new Set(); const draftPool = [];\nfor(const j of draftPoolRaw){ const k=(j.url||j.title); if(seenK.has(k)) continue; seenK.add(k); draftPool.push(j); }\n\nconst draftSys = `You write short freelance/role proposals (max 90 words). Confident, specific, one quantified proof, `+\n`end with one question. Real proof: co-owner of Mercedes-Benz mAzure HUB, 30% AWS cost cut, principal architect of NVIDIA AI factory. `+\n`LANGUAGE RULE (decide per job by region/language): if the job is in Spain or Latin America, or its text is in Spanish, write the draft in SPANISH; otherwise write it in ENGLISH. `+\n`Return ONLY a JSON array: [{\"i\":<index>,\"draft\":\"...\"}].`;\nlet drafts = [];\nif(draftPool.length){\n  const dInput = draftPool.map((j,idx)=>({ i:idx, title:j.title, company:j.company, location:j.location, desc:(j.description||'').slice(0,450) }));\n  try { drafts = parseArr(await anthropic(MODEL_DRAFT, draftSys, `PROFILE:\\n${PROFILE}\\n\\nJOBS:\\n${JSON.stringify(dInput)}\\n\\nReturn the JSON array of drafts.`, 4000)); }\n  catch(e){ console.log('draft fail:', e.message); }\n}\nconst byKey = {};\ndraftPool.forEach((j,idx)=>{ byKey[j.url||j.title] = (drafts.find(d=>d.i===idx)||{}).draft || null; });\nconst attach = (j)=>({ ...j, draft: byKey[j.url||j.title] || j.draft || null });\n\nconst premiumOut = premiumJobs.map(attach);\nconst shortlistOut = shortlist.map(attach);\n\nconsole.log(`Premium: ${premiumOut.length} | shortlist: ${shortlistOut.length} | more: ${more.length}`);\nreturn [{ json:{ total: relevant.length + premiumJobs.length, premium: premiumOut, shortlist: shortlistOut, more } }];\n"
       }
     },
     {
-      "id": "3896b1a5-9a8f-4203-9992-8837a7567947",
+      "id": "1d11684e-00d6-41be-bd9b-e80f237388b5",
       "name": "3. Upsert Supabase",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -67,7 +67,7 @@
       }
     },
     {
-      "id": "f1b3fb07-af0a-48ef-8fa2-c359e012f23d",
+      "id": "1410b70f-5d45-487a-a6c4-e0756310d9cd",
       "name": "Wait -> 09:00",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
@@ -82,7 +82,7 @@
       }
     },
     {
-      "id": "32e26c40-1608-43e7-85ed-b525949b9965",
+      "id": "da815a17-8611-471a-8293-bbc1f5c22491",
       "name": "4. Build Email General",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -97,7 +97,7 @@
       }
     },
     {
-      "id": "d251879c-d824-4e4e-b98c-9f246bd48e2c",
+      "id": "d36c2a1b-15b5-4e0f-880e-002437822eee",
       "name": "5. Send General 09:00",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
@@ -115,7 +115,7 @@
       }
     },
     {
-      "id": "c7c7920e-1ec9-479f-bda1-3d589da1bcb7",
+      "id": "46d932fc-8b6a-4ba4-888a-33c86f3392f7",
       "name": "6. Build Fresh News (TOP)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -130,7 +130,7 @@
       }
     },
     {
-      "id": "b925c745-9eb6-4bf6-abf0-a2a34e4de98b",
+      "id": "95a3167d-bd4f-45e6-8107-4a3dec315be8",
       "name": "7. Send Fresh News 09:00",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,

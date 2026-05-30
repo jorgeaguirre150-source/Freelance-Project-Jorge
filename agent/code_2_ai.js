@@ -90,10 +90,11 @@ for(const j of draftPoolRaw){ const k=(j.url||j.title); if(seenK.has(k)) continu
 
 const draftSys = `You write short freelance/role proposals (max 90 words). Confident, specific, one quantified proof, `+
 `end with one question. Real proof: co-owner of Mercedes-Benz mAzure HUB, 30% AWS cost cut, principal architect of NVIDIA AI factory. `+
-`Match the job's language. Return ONLY a JSON array: [{"i":<index>,"draft":"..."}].`;
+`LANGUAGE RULE (decide per job by region/language): if the job is in Spain or Latin America, or its text is in Spanish, write the draft in SPANISH; otherwise write it in ENGLISH. `+
+`Return ONLY a JSON array: [{"i":<index>,"draft":"..."}].`;
 let drafts = [];
 if(draftPool.length){
-  const dInput = draftPool.map((j,idx)=>({ i:idx, title:j.title, company:j.company, desc:(j.description||'').slice(0,450) }));
+  const dInput = draftPool.map((j,idx)=>({ i:idx, title:j.title, company:j.company, location:j.location, desc:(j.description||'').slice(0,450) }));
   try { drafts = parseArr(await anthropic(MODEL_DRAFT, draftSys, `PROFILE:\n${PROFILE}\n\nJOBS:\n${JSON.stringify(dInput)}\n\nReturn the JSON array of drafts.`, 4000)); }
   catch(e){ console.log('draft fail:', e.message); }
 }
