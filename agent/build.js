@@ -11,7 +11,7 @@ const codeNode = (name, x, y, code) => ({
 });
 const emailNode = (name, x, y) => ({
   id: id(), name, type: 'n8n-nodes-base.emailSend', typeVersion: 2.1, position: [x, y],
-  parameters: { fromEmail: 'aguirre_coslada@hotmail.com', toEmail: 'aguirre_coslada@hotmail.com',
+  parameters: { fromEmail: 'jorgeaguirre150@gmail.com', toEmail: 'aguirre_coslada@hotmail.com',
     subject: '={{ $json.subject }}', emailFormat: 'html', html: '={{ $json.html }}', options: {} }
 });
 

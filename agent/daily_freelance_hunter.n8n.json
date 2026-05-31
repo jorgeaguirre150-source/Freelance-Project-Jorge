@@ -2,7 +2,7 @@
   "name": "Daily Freelance Hunter",
   "nodes": [
     {
-      "id": "60938d99-f2de-4653-a43e-3704a0192177",
+      "id": "93de8408-0984-4430-9346-315737c1f73d",
       "name": "Cron 08:30 (busqueda)",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
@@ -22,7 +22,7 @@
       }
     },
     {
-      "id": "2ed7cce6-fd7c-4a31-b37d-90835204481d",
+      "id": "c38a9e53-75f7-4a10-9595-61e8c7c7d816",
       "name": "1. Ingest + Dedup",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -37,7 +37,7 @@
       }
     },
     {
-      "id": "d6d7aa48-4d4d-4e4c-a5ed-e83c2a6a7e07",
+      "id": "a606976c-e6f1-4813-90ed-9286e439001e",
       "name": "2. AI Score + Draft",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -52,7 +52,7 @@
       }
     },
     {
-      "id": "feb91db2-6fa7-4dce-85f9-6ffdf9cf0b58",
+      "id": "19adaa97-0eb6-4205-aee0-f73c116f4799",
       "name": "3. Upsert Supabase",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -67,7 +67,7 @@
       }
     },
     {
-      "id": "908071b4-b982-4e46-8dc1-db92b2b7a44d",
+      "id": "542e34e6-6444-4281-b36d-a1825dc301b4",
       "name": "Wait -> 09:00",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
@@ -82,7 +82,7 @@
       }
     },
     {
-      "id": "3dd42134-079b-45d1-b9af-140dd81a8aa7",
+      "id": "f8150f45-2afd-4116-889b-8ac450863100",
       "name": "4. Build Email General",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -97,7 +97,7 @@
       }
     },
     {
-      "id": "20c2d227-bbdd-48ce-9ab8-0e3df139c4b2",
+      "id": "444c7fd4-7f91-4236-ad51-ad704abcc698",
       "name": "5. Send General 09:00",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
@@ -106,7 +106,7 @@
         200
       ],
       "parameters": {
-        "fromEmail": "aguirre_coslada@hotmail.com",
+        "fromEmail": "jorgeaguirre150@gmail.com",
         "toEmail": "aguirre_coslada@hotmail.com",
         "subject": "={{ $json.subject }}",
         "emailFormat": "html",
@@ -115,7 +115,7 @@
       }
     },
     {
-      "id": "11d87c59-816d-4f73-8c82-c4da979f2656",
+      "id": "d0705dfc-c509-4305-9faa-7c75783137fe",
       "name": "6. Build Fresh News (TOP)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -130,7 +130,7 @@
       }
     },
     {
-      "id": "4639db9d-f3a8-46fb-97df-1ea798af67e8",
+      "id": "afed8031-c0c6-463f-b109-d2a84721eeb8",
       "name": "7. Send Fresh News 09:00",
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2.1,
@@ -139,7 +139,7 @@
         420
       ],
       "parameters": {
-        "fromEmail": "aguirre_coslada@hotmail.com",
+        "fromEmail": "jorgeaguirre150@gmail.com",
         "toEmail": "aguirre_coslada@hotmail.com",
         "subject": "={{ $json.subject }}",
         "emailFormat": "html",
