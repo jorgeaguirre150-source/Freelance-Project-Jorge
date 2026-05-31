@@ -7,7 +7,7 @@ const http = (opts) => this.helpers.httpRequest(opts);
 const MODEL_SCORE = 'claude-haiku-4-5';   // verifica IDs vigentes en tu cuenta
 const MODEL_DRAFT = 'claude-sonnet-4-5';
 
-const THRESHOLD = 65;   // match minimo para notificar (no aplica a premium)
+const THRESHOLD = 78;   // solo lo MEJOR (calidad alta). No aplica a premium.
 const DRAFT_TOP = 10;   // borradores para el resto (no-premium)
 const PREM_TOP  = 15;   // cuantas premium mostrar
 const PREM_DRAFT= 6;    // borradores para premium
@@ -56,11 +56,13 @@ console.log(`Calibracion: ${liked.length} 👍 / ${disliked.length} 👎`);
 
 // ---- 1) SCORING por lotes (Haiku) ----
 const pool = items.slice(0, MAX_SCORE);
-const scoreSys = `You score how well freelance/contract jobs match a candidate. Return ONLY a JSON array, no prose. `+
+const scoreSys = `You score how well jobs match a SENIOR candidate. Return ONLY a JSON array, no prose. `+
 `Each: {"i":<index>,"score":<0-100>,"reason":"<max 12 words>"}. `+
-`High = senior cloud/platform/devops/SRE/AI-infra/GPU, remote or EU/US, contract-friendly, rate >= floor or undisclosed. `+
-`Low = junior, on-site only, unrelated stack, or rate clearly below floor. `+
-`IMPORTANT: jobs with "premium":true are at the candidate's TOP target companies — he accepts BOTH freelance/contract AND permanent there; give a strong boost and do NOT penalize full-time/permanent.`;
+`QUALITY BAR — surface ONLY the best: strong day-rate (>= floor, ideally higher) or senior salary, senior/principal/lead scope, `+
+`reputable or well-known company, remote or EU/US, stack = cloud architecture / platform / GPU / AI-infra / DevOps-SRE. `+
+`The candidate accepts BOTH high-end freelance/contract AND strong permanent roles at good companies — score both highly when quality is high. `+
+`HEAVILY penalize (score < 50): junior/mid, on-site-only, unrelated stack, low budget / below floor, generic staffing or agency spam, vague or low-quality listings. `+
+`IMPORTANT: jobs with "premium":true are at the candidate's TOP target companies — give a strong boost (freelance OR permanent).`;
 
 let allScores = [];
 for(let start=0; start<pool.length; start+=CHUNK){

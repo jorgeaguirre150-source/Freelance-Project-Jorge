@@ -103,16 +103,24 @@ if(ADZUNA_ID && ADZUNA_KEY){
 
 // --- PREMIUM: 10 empresas TOP (ATS oficiales) — freelance O fijo ---
 const PREMIUM = [
+  // IA / LLM labs
   { name:'Anthropic',    provider:'greenhouse', token:'anthropic' },
-  { name:'Databricks',   provider:'greenhouse', token:'databricks' },
-  { name:'HashiCorp',    provider:'greenhouse', token:'hashicorp' },
-  { name:'Hugging Face', provider:'greenhouse', token:'huggingface' },
-  { name:'GitLab',       provider:'greenhouse', token:'gitlab' },
-  { name:'Elastic',      provider:'greenhouse', token:'elastic' },
-  { name:'Canonical',    provider:'greenhouse', token:'canonical' },
   { name:'OpenAI',       provider:'ashby',      token:'openai' },
   { name:'Cohere',       provider:'ashby',      token:'cohere' },
+  { name:'Hugging Face', provider:'greenhouse', token:'huggingface' },
   { name:'Scale AI',     provider:'lever',      token:'scaleai' },
+  // Cloud / Data / Platform de élite
+  { name:'Databricks',   provider:'greenhouse', token:'databricks' },
+  { name:'HashiCorp',    provider:'greenhouse', token:'hashicorp' },
+  { name:'Confluent',    provider:'greenhouse', token:'confluent' },
+  { name:'MongoDB',      provider:'greenhouse', token:'mongodb' },
+  { name:'Datadog',      provider:'greenhouse', token:'datadog' },
+  { name:'Elastic',      provider:'greenhouse', token:'elastic' },
+  { name:'GitLab',       provider:'greenhouse', token:'gitlab' },
+  { name:'GitHub',       provider:'greenhouse', token:'github' },
+  { name:'Grafana Labs', provider:'greenhouse', token:'grafanalabs' },
+  { name:'Stripe',       provider:'greenhouse', token:'stripe' },
+  { name:'Canonical',    provider:'greenhouse', token:'canonical' },
 ];
 async function fetchATS(c){
   if(c.provider==='greenhouse'){
