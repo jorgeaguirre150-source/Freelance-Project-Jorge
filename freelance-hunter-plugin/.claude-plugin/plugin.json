@@ -1,0 +1,8 @@
+{
+  "name": "freelance-hunter",
+  "version": "0.1.0",
+  "description": "Daily freelance client acquisition for a senior Cloud & AI Platform architect: find the best contracts and elite companies (EU + worldwide), draft proposals in ES/EN by region, and manage the pipeline. Includes the n8n search agent and Next.js dashboard.",
+  "author": { "name": "Jorge Aguirre Romero" },
+  "keywords": ["freelance", "cloud", "ai", "devops", "client-acquisition", "automation"],
+  "license": "MIT"
+}
